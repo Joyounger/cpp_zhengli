@@ -1,0 +1,754 @@
+第 二 章      C++简单程序设计
+
+
+2-1 C++语言有那些主要特点和优点？
+
+
+解： 
+C++语言的主要特点表现在两个方面，一是全面兼容C，二是支持面向对象的方法。C++是一个更好的C，它保持了C的简洁、高效、接近汇编语言、具有良好的可读性和可移植性等特点，对C的类型系统进行了改革和扩充，因此C++比C更安全，C++的编译系统能检查出更多的类型错误。 C++语言最重要的特点是支持面向对象。
+
+
+2-2 下列标识符哪些是合法的?
+Program， -page， _lock， test2， 3in1， @mail， A_B_C_D
+
+
+解： 
+Program， _lock， test2， A_B_C_D是合法的标识符，其它的不是。
+
+
+2-3 例2.1中每条语句的作用是什么？
+#include <iostream.h>
+void main(void)
+{
+cout<<"Hello!\n";
+cout<<"Welcome to c++!\n";
+}
+
+
+解： 
+#include <iostream.h> //指示编译器将文件iostream.h中的代码
+//嵌入到该程序中该指令所在的地方
+void main() //主函数名，void 表示函数没有返回值
+{ //函数体标志
+cout<<"Hello!\n"; //输出字符串Hello!到标准输出设备（显示器）上。
+cout<<"Welcome to c++!\n"; //输出字符串Welcome to c++！
+}
+在屏幕输出如下：
+Hello!
+Welcome to c++！
+
+
+2-4 使用关键字const而不是#define语句的好处有哪些？
+
+
+解： 
+const定义的常量是有类型的，所以在使用它们时编译器可以查错；而且，这些变量在调试时仍然是可见的。
+
+
+2-5 请写出C++语句声明一个常量PI，值为3.1416；再声明一个浮点型变量a，把PI的值赋给a。
+
+
+解： 
+const float PI = 3.1416;
+float a = PI;
+
+
+2-6 在下面的枚举类型中，Blue的值是多少？
+enum COLOR { WHITE， BLACK = 100， RED， BLUE， GREEN = 300 };
+
+
+解： 
+Blue = 102
+
+
+2-7 注释有什么作用？C++中有哪几种注释的方法？他们之间有什么区别?
+
+
+解： 
+注释在程序中的作用是对程序进行注解和说明，以便于阅读。编译系统在对源程序进行编译时不理会注释部分，因此注释对于程序的功能实现不起任何作用。而且由于编译时忽略注释部分，所以注释内容不会增加最终产生的可执行程序的大小。适当地使用注释，能够提高程序的可读性。在C++中，有两种给出注释的方法：一种是延用C语言方法，使用"/*"和"*/"括起注释文字。另一种方法是使用"//"，从"//"开始，直到它所在行的行尾，所有字符都被作为注释处理。
+
+
+2-8 什么叫做表达式？x = 5 + 7是一个表达式吗？它的值是多少？
+
+
+解： 
+任何一个用于计算值的公式都可称为表达式。x = 5 + 7是一个表达式，它的值为12。
+
+
+2-9 下列表达式的值是多少？
+1. 201 / 4
+2. 201 % 4
+3. 201 / 4.0
+
+
+解： 
+1． 50
+2． 1
+3． 50.25
+
+
+2-10 执行完下列语句后，a、b、c三个变量的值为多少？
+a = 30;
+b = a++;
+c = ++a;
+
+
+解： 
+a：32 ； b：30 ； c：32；
+
+
+2-11 在一个for循环中，可以初始化多个变量吗？如何实现？
+
+
+解： 
+在for循环设置条件的第一个";"前，用，分隔不同的赋值表达式。
+例如：
+for (x = 0， y = 10; x < 100; x++， y++)
+
+
+2-12 执行完下列语句后，n的值为多少？
+int n;
+for (n = 0; n < 100; n++)
+
+
+解： 
+n的值为100
+
+
+2-13 写一条for语句，计数条件为n从100到200，步长为2；然后用while和do…while语句完成同样的循环。
+
+
+解： 
+for循环：
+for (int n = 100; n <= 200; n += 2); 
+
+while循环：
+int x = 100;
+while (n <= 200)
+n += 2; 
+
+do…while循环：
+int n = 100;
+do
+{
+n += 2;
+} while(n <= 200);
+
+
+2-14 if ( x = 3 ) 和 if (x = = 3) 这两条语句的差别是什么？
+
+
+解： 
+语句if(x = 3)把3赋给x，赋值表达式的值为true，作为if语句的条件；语句if(x == 3)首先判断x的值是否为3，若相等条件表达式的值为ture，否则为false。
+
+
+2-15 什么叫做作用域？什么叫做局部变量？什么叫做全局变量，如何使用全局变量？ 
+
+
+解： 
+作用域是一个标识符在程序正文中有效的区域。局部变量，一般来讲就是具有块作用域的变量；全局变量，就是具有文件作用域的变量。 
+
+
+2-16 已知x、y两个变量，写一条简单的if语句，把较小的的值赋给原本值较大的变量。
+
+
+解： 
+if (x > y)
+x = y;
+else // y > x || y == x
+y = x;
+
+
+2-17 修改下面这个程序中的错误，改正后它的运行结果是什么？
+#include <iostream.h>
+void main()
+int i
+int j;
+i = 10; /* 给i赋值
+j = 20; /* 给j赋值 */
+cout << "i + j = << i + j; /* 输出结果 */
+return 0;
+}
+
+
+解： 
+改正：
+#include <iostream.h>
+int main()
+{
+int i;
+int j;
+i = 10; // 给i赋值
+j = 20; /* 给j赋值 */
+cout << "i + j = " << i + j; /* 输出结果 */
+return 0;
+}
+程序运行输出：
+i + j = 30
+
+
+2-18 编写一个程序，运行时提示输入一个数字，再把这个数字显示出来。
+
+
+解： 
+源程序：
+#include <iostream.h> 
+
+int main()
+{
+int i;
+cout << "请输入一个数字：";
+cin >> i;
+cout << "您输入一个数字是" << i << endl;
+return 0;
+}
+程序运行输出：
+请输入一个数字：5
+您输入一个数字是5
+
+
+2-19 C++有哪几种数据类型？简述其值域。编程显示你使用的计算机中的各种数据类型的字节数。
+
+
+解： 
+源程序：
+#include <iostream.h> 
+
+int main()
+{
+cout << "The size of an int is:\t\t" << sizeof(int) << " bytes.\n";
+cout << "The size of a short int is:\t" << sizeof(short) << " bytes.\n";
+cout << "The size of a long int is:\t" << sizeof(long) << " bytes.\n";
+cout << "The size of a char is:\t\t" << sizeof(char) << " bytes.\n";
+cout << "The size of a float is:\t\t" << sizeof(float) << " bytes.\n";
+cout << "The size of a double is:\t" << sizeof(double) << " bytes.\n";
+return 0;
+}
+程序运行输出：
+The size of an int is: 4 bytes.
+The size of a short int is: 2 bytes.
+The size of a long int is: 4 bytes.
+The size of a char is: 1 bytes.
+The size of a float is: 4 bytes.
+The size of a double is: 8 bytes.
+
+
+2-20 打印ASCII码为32~127的字符。
+
+
+解： 
+#include <iostream.h>
+int main()
+{
+for (int i = 32; i<128; i++)
+cout << (char) i;
+return 0;
+}
+
+程序运行输出：
+!"#$%G'()*+，./0123456789:;<>?@ABCDEFGHIJKLMNOP_QRSTUVWXYZ[\]^'abcdefghijklmnopqrstuvwxyz<|>~s
+
+
+2-21 运行下面的程序，观察其输出，与你的设想是否相同？
+#include <iostream.h>
+int main()
+{
+unsigned int x;
+unsigned int y = 100;
+unsigned int z = 50;
+x= y - z;
+cout << "Difference is: " << x;
+x = z - y;
+cout << "\nNow difference is: " << x <<endl;
+return 0;
+}
+
+
+解： 
+程序运行输出：
+Difference is: 50
+Now difference is: 4294967246
+注意，第二行的输出并非 -50，注意x、y、z的数据类型。
+
+
+2-22 运行下面的程序，观察其输出，体会i++与++i的差别。
+#include <iostream.h>
+int main()
+{
+int myAge = 39; // initialize two integers
+int yourAge = 39;
+cout << "I am: " << myAge << " years old.\n";
+cout << "You are: " << yourAge << " years old\n";
+myAge++; // postfix increment
+++yourAge; // prefix increment
+cout << "One year passes...\n";
+cout << "I am: " << myAge << " years old.\n";
+cout << "You are: " << yourAge << " years old\n";
+cout << "Another year passes\n";
+cout << "I am: " << myAge++ << " years old.\n";
+cout << "You are: " << ++yourAge << " years old\n";
+cout << "Let's print it again.\n";
+cout << "I am: " << myAge << " years old.\n";
+cout << "You are: " << yourAge << " years old\n";
+return 0;
+}
+
+
+解： 
+程序运行输出：
+I am 39 years old
+You are 39 years old
+One year passes
+I am 40 years old
+You are 40 years old
+Another year passes
+I am 40 years old
+You are 41 years old
+Let's print it again
+I am 41 years old
+You are 41 years old
+
+
+2-23 什么叫常量？什么叫变量？
+
+
+解： 
+所谓常量是指在程序运行的整个过程中其值始终不可改变的量，除了用文字表示常量外，也可以为常量命名，这就是符号常量；在程序的执行过程中其值可以变化的量称为变量，变量是需要用名字来标识的。
+
+
+2-24 变量有哪几种存储类型？
+
+
+解： 
+变量有以下几种存储类型：
+auto存储类型：采用堆栈方式分配内存空间，属于一时性存储，其存储空间可以被若干变量多次覆盖使用； 
+register存储类型：存放在通用寄存器中；
+extern存储类型：在所有函数和程序段中都可引用；
+static存储类型：在内存中是以固定地址存放的，在整个程序运行期间都有效。
+
+
+2-25 写出下列表达式的值：
+1. 2 < 3 && 6 < 9
+2. ! ( 4<7 )
+3. ! ( 3 > 5) || (6 < 2 )
+
+
+解： 
+1. true
+2. false
+3. true
+
+
+2-26 若a = 1，b = 2，c = 3，下列各式的结果是什么?
+1. a | b - c
+2. a ^ b & -c
+3. a & b | c
+4. a | b & c
+
+
+解： 
+1． -1
+2． 1
+3． 3
+4． 3
+
+
+2-27 若a = 1，下列各式的结果是什么?
+1. ! a | a
+2. ~ a | a
+3. a ^ a
+4. a >> 2
+
+
+解： 
+1． 1
+2． -1
+3． 0
+4． 0
+
+
+2-28 编写一个完整的程序，实现功能：向用户提问"现在正在下雨吗？"，提示用户输入Y或N。若输入为Y，显示"现在正在下雨。"； 若输入为N，显示"现在没有下雨。"；否则继续提问"现在正在下雨吗？"
+
+
+解： 
+源程序：
+#include <iostream.h>
+#include <stdlib.h> 
+
+void main()
+{
+char flag;
+while(1)
+{
+cout << "现在正在下雨吗？(Yes or No):";
+cin >> flag;
+if ( toupper(flag) == 'Y')
+{
+cout << "现在正在下雨。";
+break;
+}
+if ( toupper(flag) == 'N')
+{
+cout << "现在没有下雨。";
+break;
+}
+
+}
+}
+程序运行输出：
+现在正在下雨吗？(Yes or No):x
+现在正在下雨吗？(Yes or No):l
+现在正在下雨吗？(Yes or No):q
+现在正在下雨吗？(Yes or No):n
+现在没有下雨。
+或：
+现在正在下雨吗？(Yes or No):y
+现在正在下雨。
+
+
+2-29 编写一个完整的程序，运行时向用户提问"你考试考了多少分？（0~100）"，接收输入后判断其等级，显示出来。规则如下：
+
+
+解： 
+#include <iostream.h> 
+
+void main()
+{
+int i,score;
+
+cout << "你考试考了多少分?(0~100):";
+cin >> score;
+if (score>100 || score<0)
+cout << "分数值必须在0到100之间!";
+else
+{
+
+i = score/10;
+switch (i)
+{
+case 10:
+case 9:
+cout << "你的成绩为优！";
+break;
+case 8:
+cout << "你的成绩为良！";
+break;
+case 7:
+case 6:
+cout << "你的成绩为中！";
+break;
+default:
+cout << "你的成绩为差！";
+}
+} 
+}
+程序运行输出：
+你考试考了多少分?(0~100)：85
+你的成绩为良！
+
+
+2-30 （1）实现一个简单的菜单程序，运行时显示"Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:"提示用户输入，A表示增加，D表示删除，S表示排序，Q表示退出，输入为A、D、S时分别提示"数据已经增加、删除、排序。"输入为Q时程序结束。要求使用if … else语句进行判断，用break、continue控制程序流程。
+
+
+解： 
+#include <iostream.h>
+#include <stdlib.h> 
+
+void main()
+{
+char choice,c;
+while(1)
+{
+cout << "Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:";
+cin >> c;
+choice = toupper(c);
+if (choice == 'A')
+{
+cout << "数据已经增加. " << endl;
+continue;
+}
+else if (choice == 'D')
+{
+cout << "数据已经删除. " << endl;
+continue;
+}
+else if (choice == 'S')
+{
+cout << "数据已经排序. " << endl;
+continue;
+}
+else if (choice == 'Q')
+break;
+}
+}
+程序运行输出：
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:a
+数据已经增加. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:d
+数据已经删除. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:s
+数据已经排序. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:q 
+
+（2）实现一个简单的菜单程序，运行时显示"Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:"提示用户输入，A表示增加，D表示删除，S表示排序，Q表示退出，输入为A、D、S时分别提示"数据已经增加、删除、排序。"输入为Q时程序结束。要求使用Switch语句。
+解： 
+源程序：
+#include <iostream.h>
+#include <stdlib.h> 
+
+void main()
+{
+char choice;
+while(1)
+{
+cout << "Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:";
+cin >> choice;
+switch(toupper(choice))
+{
+case 'A':
+cout << "数据已经增加. " << endl;
+break;
+case 'D':
+cout << "数据已经删除. " << endl;
+break;
+case 'S':
+cout << "数据已经排序. " << endl;
+break;
+case 'Q':
+exit(0);
+break;
+default:
+;
+}
+}
+}
+程序运行输出：
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:a
+数据已经增加. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:d
+数据已经删除. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:s
+数据已经排序. 
+Menu: A(dd) D(elete) S(ort) Q(uit)， Select one:q
+
+
+2-31 用穷举法找出1~100间的质数，显示出来。分别使用while，do-while，for循环语句实现。
+
+
+解： 
+源程序： 
+使用while循环语句：
+#include <iostream.h>
+#include <math.h> 
+
+void main()
+{
+int i,j,k,flag;
+i = 2;
+while(i <= 100)
+{
+flag = 1;
+k = sqrt(i);
+j = 2;
+while (j <= k)
+{
+if(i%j == 0)
+{
+flag = 0;
+break;
+}
+j++;
+}
+if (flag)
+cout << i << "是质数." << endl;
+i++;
+}
+} 
+
+使用do…while循环语句：
+#include <iostream.h>
+#include <math.h> 
+
+void main()
+{
+int i,j,k,flag;
+i = 2;
+do{
+flag = 1;
+k = sqrt(i);
+j = 2;
+do{
+if(i%j == 0)
+{
+flag = 0;
+break;
+}
+j++;
+}while (j <= k);
+if (flag)
+cout << i << "是质数." << endl;
+i++;
+}while(i <= 100);
+} 
+
+使用for循环语句：
+#include <iostream.h>
+#include <math.h> 
+
+void main()
+{
+int i,j,k,flag;
+for(i = 2; i <= 100; i++)
+{
+flag = 1;
+k = sqrt(i);
+for (j = 2; j <= k; j++)
+{
+if(i%j == 0)
+{
+flag = 0;
+break;
+}
+}
+if (flag)
+cout << i << "是质数." << endl;
+}
+}
+程序运行输出：
+2是质数.
+3是质数.
+5是质数.
+7是质数.
+11是质数.
+13是质数.
+17是质数.
+19是质数.
+23是质数.
+29是质数.
+31是质数.
+37是质数.
+41是质数.
+43是质数.
+47是质数.
+53是质数.
+59是质数.
+61是质数.
+67是质数.
+71是质数.
+73是质数.
+79是质数.
+83是质数.
+89是质数.
+97是质数.
+
+
+2-32 比较Break语句与Continue语句的不同用法。
+
+
+解： 
+Break使程序从循环体和switch语句内跳出，继续执行逻辑上的下一条语句，不能用在别处；
+continue 语句结束本次循环，接着开始判断决定是否继续执行下一次循环； 
+
+  
+
+2-33 定义一个表示时间的结构体，可以精确表示年、月、日、小时、分、秒；提示用户输入年、月、日、小时、分、秒的值，然后完整地显示出来。 
+
+
+解： 
+源程序见"实验指导"部分实验二
+
+
+2-34 在程序中定义一个整型变量，赋以1~100的值，要求用户猜这个数，比较两个数的大小，把结果提示给用户，直到猜对为止。分别使用while、do…while语句实现循环。
+
+
+解： 
+//使用while语句
+#include <iostream.h> 
+
+void main() {
+int n = 18;
+int m = 0;
+while(m != n) 
+{
+cout << "请猜这个数的值为多少？(0~~100):";
+cin >> m;
+if (n > m)
+cout << "你猜的值太小了！" << endl;
+else if (n < m)
+cout << "你猜的值太大了！" << endl;
+else
+cout << "你猜对了！" << endl;
+}
+}
+//使用do…while语句
+#include <iostream.h> 
+
+void main() {
+int n = 18;
+int m = 0;
+do{
+cout << "请猜这个数的值为多少？(0~~100):";
+cin >> m;
+if (n > m)
+cout << "你猜的值太小了！" << endl;
+else if (n < m)
+cout << "你猜的值太大了！" << endl;
+else
+cout << "你猜对了！" << endl;
+}while(n != m);
+} 
+
+程序运行输出：
+请猜这个数的值为多少？(0~~100):50
+你猜的值太大了！
+请猜这个数的值为多少？(0~~100):25
+你猜的值太大了！ 
+请猜这个数的值为多少？(0~~100):10
+你猜的值太小了！
+请猜这个数的值为多少？(0~~100):15
+你猜的值太小了！
+请猜这个数的值为多少？(0~~100):18
+你猜对了！ 
+
+  
+
+2-35 定义枚举类型weekday，包括Sunday到Saturday七个元素在程序中定义weekday类型的变量，对其赋值，定义整型变量，看看能否对其赋weekday类型的值。
+
+
+解： 
+#include <iostream.h> 
+
+enum weekday
+{
+Sunday,
+Monday,
+Tuesday,
+Wednesday,
+Thursday,
+Friday,
+Saturday
+}; 
+
+void main()
+{
+int i;
+weekday d = Thursday;
+cout << "d = " << d << endl;
+i = d;
+cout << "i = " << i << endl;
+
+d = (weekday)6;
+cout << "d = " << d << endl;
+d = weekday( 4 );
+cout << "d = " << d << endl;
+} 
+
+程序运行输出：
+d = 4
+i = 4
+d = 6
+d = 4 
+
+
+
+ 

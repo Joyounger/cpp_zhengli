@@ -1,0 +1,38 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: MFCFirst - Win32 Debug--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\zrf\LOCALS~1\Temp\RSP58.tmp" with contents
+[
+/nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"Debug/MFCFirst.pch" /Yu"stdafx.h" /Fo"Debug/" /Fd"Debug/" /FD /GZ   /c 
+"E:\MFCFirst\MFCFirstView.cpp"
+]
+Creating command line "cl.exe @C:\DOCUME~1\zrf\LOCALS~1\Temp\RSP58.tmp" 
+Creating temporary file "C:\DOCUME~1\zrf\LOCALS~1\Temp\RSP59.tmp" with contents
+[
+/nologo /subsystem:windows /incremental:yes /pdb:"Debug/MFCFirst.pdb" /debug /machine:I386 /out:"Debug/MFCFirst.exe" /pdbtype:sept 
+.\Debug\MFCFirst.obj
+.\Debug\StdAfx.obj
+.\Debug\MainFrm.obj
+.\Debug\ChildFrm.obj
+.\Debug\MFCFirstDoc.obj
+.\Debug\MFCFirstView.obj
+.\Debug\MFCFirst.res
+]
+Creating command line "link.exe @C:\DOCUME~1\zrf\LOCALS~1\Temp\RSP59.tmp"
+<h3>Output Window</h3>
+Compiling...
+MFCFirstView.cpp
+Linking...
+
+
+
+<h3>Results</h3>
+MFCFirst.exe - 0 error(s), 0 warning(s)
+</pre>
+</body>
+</html>

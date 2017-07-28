@@ -1,0 +1,1100 @@
+第 九 章       群体类
+
+
+9-1 程序中提示输入班级中的学生人数N，再依次提示用户输入N个人在课程A的考试成绩，然后计算出平均成绩，显示出来。请使用教材第9章中的数组类模板Array定义浮点型数组储存考试成绩值。
+
+
+解： 
+//array.h即为教材中的例程9-2，参见教材第9章
+//array.h
+#ifndef ARRAY_CLASS
+#define ARRAY_CLASS 
+
+#include <iostream.h>
+#include <stdlib.h>
+
+#ifndef NULL
+const int NULL = 0;
+#endif // NULL
+
+//错误类型集合，共有三种类型的错误：数组大小错误、内存分配错误和下标越界
+enum ErrorType 
+{invalidArraySize, memoryAllocationError, indexOutOfRange};
+
+//错误信息
+char *errorMsg[] =
+{
+"Invalid array size", "Memory allocation error",
+"Invalid index: "
+};
+
+//数组类模板
+template <class T> 
+class Array
+{
+private:
+T* alist; //T类型指针，用于存放动态分配的数组内存首地址
+int size; //数组大小（元素个数）
+
+// 错误处理函数
+void Error(ErrorType error,int badIndex=0) const;
+
+public:
+Array(int sz = 50); //构造函数
+Array(const Array<T>& A); //拷贝构造函数
+~Array(void); //析构函数
+
+//重载"="使数组对象可以整体赋值
+Array<T>& operator= (const Array<T>& rhs); 
+
+//重载"[]"与T*，使Array对象可以起到C++普通数组的作用
+T& operator[](int i); 
+operator T* (void) const;
+
+int ListSize(void) const; // 取数组的大小
+
+void Resize(int sz); // 修改数组的大小
+};
+
+//以下为类成员函数的实现
+
+//模扳函数Error实现输出错误信息的功能
+template <class T>
+void Array<T>::Error(ErrorType error, int badIndex) const
+{
+cout << errorMsg[error]; //根据错误类型，输出相应的错误信息
+// for indexOutOfRange, print the bad index
+if (error == indexOutOfRange)
+cout << badIndex; //如果是下标越界错，输出错误的下标
+cout << endl;
+exit(1);
+}
+
+// 构造函数
+template <class T>
+Array<T>::Array(int sz)
+{
+if (sz <= 0) //sz为数组大小（元素个数），若小于0，则输出错误信息
+Error(invalidArraySize);
+
+size = sz; // 将元素个数赋值给变量size
+alist = new T[size]; //动态分配size个T类型的元素空间
+if (alist == NULL) //如果分配内存不成功，输出错误信息
+Error(memoryAllocationError);
+}
+
+// 析构函数
+template <class T>
+Array<T>::~Array(void)
+{ 
+delete [] alist;
+}
+
+// 拷贝构造函数
+template <class T>
+Array<T>::Array(const Array<T>& X)
+{
+//从对象X取得数组大小，并赋值给当前对象的成员
+int n = X.size; 
+size = n;
+
+//为对象申请内存并进行出错检查
+alist = new T[n]; // 动态分配n个T类型的元素空间
+if (alist == NULL) //如果分配内存不成功，输出错误信息
+Error(memoryAllocationError);
+
+// 从对象X复制数组元素到本对象 
+T* srcptr = X.alist; // X.alist是对象X的数组首地址
+T* destptr = alist; // alist是本对象中的数组首地址
+while (n--) // 逐个复制数组元素
+*destptr++ = *srcptr++;
+}
+
+// 重载"="运算符，将对象rhs赋值给本对象。实现对象之间的整体赋值
+template <class T>
+Array<T>& Array<T>::operator= (const Array<T>& rhs)
+{
+int n = rhs.size; // 取rhs的数组大小
+
+//如果本对象中数组大小与rhs不同，则删除数组原有内存，然后重新分配
+if (size != n)
+{
+delete [] alist; // 删除数组原有内存
+alist = new T[n]; // 重新分配n个元素的内存
+if (alist == NULL) //如果分配内存不成功，输出错误信息
+Error(memoryAllocationError);
+size = n; //记录本对象的数组大小
+}
+
+// 从rhs向本对象复制元素
+T* destptr = alist;
+T* srcptr = rhs.alist;
+while (n--) 
+*destptr++ = *srcptr++;
+
+// 返回指向本对象的指针
+return *this;
+}
+
+// 重载下标操作符，实现与普通数组一样通过下标访问元素，并且具有越界检查功能
+template <class T>
+T& Array<T>::operator[] (int n)
+{
+// 检查下标是否越界
+if (n < 0 || n > size-1)
+Error(indexOutOfRange,n);
+// 返回下标为n的数组元素
+return alist[n];
+}
+
+//重载指针转换操作符，使指向T类对象的指针成为当前对象中私有数组的首地址。
+//因而可以象使用普通数组首地址一样使用T类型指针
+template <class T>
+Array<T>::operator T* (void) const
+{
+// 返回当前对象中私有数组的首地址
+return alist;
+}
+
+//取当前数组的大小
+template <class T>
+int Array<T>::ListSize(void) const
+{
+return size;
+}
+
+// 将数组大小修改为sz
+template <class T>
+void Array<T>::Resize(int sz)
+{
+// 检查是否sz<= 0
+if (sz <= 0) 
+Error(invalidArraySize);
+// 如果指定的大小与原有大小一样，什么也不做
+if (sz == size)
+return;
+
+// 申请新的数组内存，并测试是否申请成功
+T* newlist = new T[sz];
+if (newlist == NULL)
+Error(memoryAllocationError);
+
+// 将sz与size中较小的一个赋值给n
+int n = (sz <= size) ? sz : size;
+
+// 将原有数组中前n个元素复制到新数组中
+T* srcptr = alist; // 原数组alist的首地址
+T* destptr = newlist; // 新数组newlist的首地址
+while (n--) // 复制数组元素
+*destptr++ = *srcptr++;
+
+// 删除原数组
+delete[] alist;
+
+// 使alist 指向新数组，并更新size
+alist = newlist;
+size = sz;
+}
+
+#endif // ARRAY_CLASS
+
+//test9_1.cpp
+#include <iostream.h>
+#include <iomanip.h>
+
+void main()
+{
+int n;
+double AverScore,TotalScore = 0;
+cout << "请输入学生人数：";
+cin >> n;
+Array<float> Score(n);
+for (int i=0; i<n; i++)
+{
+cout << "请输入第" << i+1 <<"个学生的课程A成绩(0~100)：";
+cin >> Score[i];
+TotalScore += Score[i];
+}
+AverScore = TotalScore/n;
+cout << "平均成绩为" << setprecision(4) << AverScore << endl;
+}
+
+程序运行输出：
+请输入学生人数：3
+请输入第1个学生的课程A成绩(0~100)：80
+请输入第2个学生的课程A成绩(0~100)：80
+请输入第3个学生的课程A成绩(0~100)：81
+平均成绩为80.33
+
+
+9-2 链表中的一个节点包含哪些数据成员？单链表和双向链表的区别是什么？
+
+
+解： 
+链表是由系列结点组成的，每一个结点包括数据域和指向链表中其它结点的指针（即下一个结点的地址）。每个结点中只有一个指向后继结点指针的链表称为单链表。如果链表中每个结点中有两个用于连接其它结点的指针，一个指向前趋结点（称前趋指针），另一个指向后继结点（称后继指针），这样的链表称为双向链表。
+
+
+9-3 链表中元素的最大数目为多少？
+
+
+解：
+链表中元素的最大数目没有固定限制，只取决于可用的内存数量。
+
+
+9-4 在双向链表中使用的节点类与单链表中使用的节点类相比，应有何不同？试定义并实现双向链表中使用的节点类DNODE。
+
+
+解： 
+每一个结点包括数据域和指向链表中其它结点的指针（即下一个结点的地址），单链表中使用的节点类中每个结点中只有一个指向后继结点指针；在双向链表中使用的节点类中有两个用于连接其它结点的指针，一个指向前趋结点（称前趋指针），另一个指向后继结点（称后继指针）。双向链表中使用的节点类可如下定义：
+//dnode.h
+#ifndef DOUBLY_LINKED_NODE_CLASS
+#define DOUBLY_LINKED_NODE_CLASS
+
+template <class T>
+class DNode
+{
+private:
+// circular links to the left and right
+DNode<T> *left;
+DNode<T> *right;
+public: 
+// data is public 
+T data;
+
+// constructors
+DNode(void); 
+DNode (const T& item);
+
+
+// list modification methods
+void InsertRight(DNode<T> *p);
+void InsertLeft(DNode<T> *p);
+DNode<T> *DeleteNode(void);
+
+
+// obtain address of the next node to the left or right
+DNode<T> *NextNodeRight(void) const;
+DNode<T> *NextNodeLeft(void) const;
+};
+
+// constructor that creates an empty list and
+// leaves the data uninitialized. use for header
+template <class T>
+DNode<T>::DNode(void)
+{
+// initialize the node so it points to itself
+left = right = this;
+}
+
+// constructor that creates an empty list and initializes data
+template <class T>
+DNode<T>::DNode(const T& item)
+{
+// set node to point to itself and initialize data
+left = right = this;
+data = item;
+}
+
+// insert a node p to the right of current node
+template <class T>
+void DNode<T>::InsertRight(DNode<T> *p)
+{
+// link p to its successor on the right
+p->right = right;
+right->left = p;
+
+// link p to the current node on its left
+p->left = this;
+right = p;
+}
+
+// insert a node p to the left of current node
+template <class T>
+void DNode<T>::InsertLeft(DNode<T> *p)
+{
+// link p to its successor on the left
+p->left = left;
+left->right = p;
+
+// link p to the current node on its right
+p->right = this;
+left = p;
+}
+
+// unlink the current node from the list and return its address
+template <class T>
+DNode<T> *DNode<T>::DeleteNode(void)
+{
+// node to the left must be linked to current node's right
+left->right = right;
+
+// node to the right must be linked to current node's left
+right->left = left;
+
+// return the address of the current node
+return this;
+}
+
+// return pointer to the next node on the right
+template <class T>
+DNode<T> *DNode<T>::NextNodeRight(void) const
+{
+return right;
+}
+
+// return pointer to the next node on the left
+template <class T>
+DNode<T> *DNode<T>::NextNodeLeft(void) const
+{
+return left;
+}
+
+#endif // DOUBLY_LINKED_NODE_CLASS
+
+
+9-5 使用本章中的链表类定义两个整型链表A和B，分别插入5个元素，然后把B中的元素加入A的尾部。
+
+
+解： 
+本题的解答见“实验指导” 部分“实验九”。
+
+
+9-6 从教材第9章的链表类LinkedList中派生有序链表类OrderList，添加成员函数InsertOrder，实现链表元素的有序（递增）插入。定义两个整型有序链表A和B，分别按递增顺序插入5个元素，然后把B中的元素插入A中，保持A中递增顺序不变。
+
+
+解： 
+#include <iostream.h>
+#include "link.h" //参见"实验指导" 部分"实验九"
+
+template <class T>
+class Link:public LinkedList<T>
+{
+public:
+void InsertOrder(const T& item);
+};
+
+template <class T>
+void Link<T>::InsertOrder(const T& item)
+{
+Reset();
+while (!EndOfList())
+{
+if (item < Data())
+break;
+Next();
+} 
+InsertAt(item);
+}
+
+void main(void)
+{
+Link<int> A,B;
+int i, item;
+
+cout << "请输入加入链表A的五个整数：";
+for ( i=0; i<5; i++ )
+{
+cin >> item;
+A.InsertOrder(item);
+}
+
+cout << "请输入加入链表B的五个整数：";
+for ( i=0; i<5; i++ )
+{
+cin >> item;
+B.InsertOrder(item);
+}
+
+cout << endl << "有序链表A中的元素为：";
+A.Reset();
+while(!A.EndOfList())
+{
+cout << A.Data() << " ";
+A.Next(); 
+}
+
+cout << endl << "有序链表B中的元素为：";
+B.Reset();
+while(!B.EndOfList())
+{
+A.InsertOrder(B.Data());
+cout << B.Data() << " ";
+B.Next(); 
+}
+
+cout << endl << "加入链表B中元素后，链表A中的元素为：";
+A.Reset();
+while(!A.EndOfList())
+{
+cout << A.Data() << " ";
+A.Next(); 
+}
+}
+
+程序运行输出：
+请输入加入链表A的五个整数：1 3 7 6 5
+请输入加入链表B的五个整数：2 6 8 5 4
+链表A中的元素为：1 3 5 6 7 
+链表B中的元素为：2 4 5 6 8 
+加入链表B中元素后，链表A中的元素为：1 2 3 4 5 5 6 6 7 8 
+
+
+9-7 什么叫作栈？对栈中元素的操作有何特性？
+
+
+解： 
+栈是只能从一端访问的线性群体，可以访问的这一端称栈顶，另一端称栈底。对栈顶位置的标记称为栈顶指针，对栈底位置的标记称为栈底指针。向栈顶添加元素称为“压入栈”，删除栈顶元素称为“弹出栈”。栈中元素的添加和删除操作具有“后进先出”（LIFO）的特性。
+
+
+9-8 在标准C++类库中，栈类（stack）的成员函数stack::push()在栈顶端添加元素，stack::pop()从非空栈的栈顶端中删除一个元素，stack::empty()判断栈是否为空， stack::top()返回非空栈的栈顶元素，stack::size()返回栈中元素的个数，请构造一个整型栈，然后对这个栈调用以上几个函数，体会栈这种数据结构的特点和其成员函数的用法。
+
+
+解： 
+#include <stack>
+#include <iostream>
+
+using namespace std ;
+
+typedef stack<int> STACK_INT;
+
+void main()
+{
+STACK_INT stack1;
+
+cout << "stack1.empty() returned " <<
+(stack1.empty()? "true": "false") << endl; // Function 3
+
+cout << "stack1.push(2)" << endl;
+stack1.push(2);
+
+if (!stack1.empty()) // Function 3
+cout << "stack1.top() returned " <<
+stack1.top() << endl; // Function 1
+
+cout << "stack1.push(5)" << endl;
+stack1.push(5);
+
+if (!stack1.empty()) // Function 3
+cout << "stack1.top() returned " <<
+stack1.top() << endl; // Function 1
+
+cout << "stack1.push(11)" << endl;
+stack1.push(11);
+
+if (!stack1.empty()) // Function 3
+cout << "stack1.top() returned " <<
+stack1.top() << endl; // Function 1
+
+// Modify the top item. Set it to 6.
+if (!stack1.empty()) { // Function 3
+cout << "stack1.top()=6;" << endl;
+stack1.top()=6; // Function 1
+}
+
+// Repeat until stack is empty
+while (!stack1.empty()) { // Function 3
+const int& t=stack1.top(); // Function 2
+cout << "stack1.size() equals " << stack1.size() << endl;
+cout << "stack1.top() returned " << t << endl;
+cout << "stack1.pop()" << endl;
+stack1.pop();
+}
+cout << "stack1.size() equals " << stack1.size() << endl;
+}
+
+程序运行输出：
+stack1.empty() returned true
+stack1.push(2)
+stack1.top() returned 2
+stack1.push(5)
+stack1.top() returned 5
+stack1.push(11)
+stack1.top() returned 11
+stack1.top()=6;
+stack1.top() returned 6
+stack1.pop()
+stack1.top() returned 5
+stack1.pop()
+stack1.top() returned 2
+stack1.pop()
+
+
+9-9 在标准C++类库中，对栈类（stack）重载了= =、! =、>、> =、<、< =等运算符，以对两个不同的栈进行算术比较运算操作，请构造一个整型栈，以 = =、< 运算为例，对两个栈进行算术比较运算，体会其比较归者规则；运行程序，观察其输出。
+
+
+解： 
+源程序：
+#include <stack>
+#include <iostream>
+
+using namespace std ;
+
+typedef stack<double> STACK_DOUBLE;
+
+void main()
+{
+STACK_DOUBLE stack1,stack2;
+
+// Add item 4.0 to Stack1. Stack1 contains 4.0.
+cout << "stack1.push(4.0) s1=[4.0]" << endl;
+stack1.push(4.0);
+
+// Add item 3.0 to Stack1. Stack1 contains 3.0(top) and 4.0(bottom).
+cout << "stack1.push(3.0) s1=[3.0 4.0]" << endl;
+stack1.push(3.0);
+
+// Add item 4.0 to Stack2. Stack2 contains 4.0 (top=bottom).
+cout << "stack2.push(4.0) s2=[4.0]" << endl;
+stack2.push(4.0);
+
+// Compare if Stack1 is smaller than Stack2. Should return False.
+
+cout << "stack1==stack2 is " <<
+((stack1==stack2)? "True": "False") << endl;
+
+cout << "stack1<stack2 is " <<
+((stack1<stack2)? "True": "False") << endl << endl;
+
+// Add item 6.0 to Stack2. Stack2 contains 6.0(top) and 4.0(bottom).
+cout << "stack2.push(6.0) s2=[6.0 4.0]" << endl;
+stack2.push(6.0);
+
+// Compare if Stack1 is smaller than Stack2. Should return True.
+cout << "stack1==stack2 is " <<
+((stack1==stack2)? "True": "False") << endl;
+
+cout << "stack1<stack2 is " <<
+((stack1<stack2)? "True": "False") << endl << endl;
+
+// Add item 8.0 to Stack2. Stack2 contains 8.0(top), 6.0 and
+// 4.0(bottom).
+cout << "stack2.push(8.0) s2=[8.0 6.0 4.0]" << endl;
+stack2.push(8.0);
+
+// Compare if Stack1 is smaller than Stack2. Should return True.
+
+cout << "stack1==stack2 is " <<
+((stack1==stack2)? "True": "False") << endl;
+cout << "stack1<stack2 is " <<
+((stack1<stack2)? "True": "False") << endl << endl;
+
+// Delete item 8.0 from Stack2.
+cout << "stack2.pop() s2=[6.0 4.0]" << endl;
+stack2.pop();
+
+// Delete item 6.0 from Stack2.
+cout << "stack2.pop() s2=[4.0]" << endl;
+stack2.pop();
+
+// Add item 3.0 to Stack2. Stack2 contains 3.0(top) and 4.0(bottom).
+cout << "stack2.push(3.0) s2=[3.0 4.0]" << endl;
+stack2.push(3.0);
+
+// Compare if Stack1 is smaller than Stack2. Should return False.
+cout << "stack1==stack2 is " <<
+((stack1==stack2)? "True": "False") << endl;
+cout << "stack1<stack2 is " <<
+((stack1<stack2)? "True": "False") << endl << endl;
+
+// Delete item 3.0 from Stack2.
+cout << "stack2.pop() s2=[4.0]" << endl;
+stack2.pop();
+
+// Delete item 4.0 from Stack2.
+cout << "stack2.pop() s2=[]" << endl;
+stack2.pop();
+
+// Add item 8.0 to Stack2. Stack2 contains 8.0(top=bottom).
+cout << "stack2.push(8.0) s2=[8.0]" << endl;
+stack2.push(8.0);
+
+// Compare if Stack1 is smaller than Stack2. Should return True.
+cout << "stack1==stack2 is " <<
+((stack1==stack2)? "True": "False") << endl;
+cout << "stack1<stack2 is " <<
+((stack1<stack2)? "True": "False") << endl << endl;
+
+}
+
+程序运行输出： 
+stack1.push(4.0) s1=[4.0]
+stack1.push(3.0) s1=[3.0 4.0]
+stack2.push(4.0) s2=[4.0]
+stack1<stack2 is False
+
+stack2.push(6.0) s2=[6.0 4.0]
+stack1<stack2 is True
+
+stack2.push(8.0) s2=[8.0 6.0 4.0]
+stack1<stack2 is True
+
+stack2.pop() s2=[6.0 4.0]
+stack2.pop() s2=[4.0]
+stack2.push(3.0) s2=[3.0 4.0]
+stack1<stack2 is False
+
+stack2.pop() s2=[4.0]
+stack2.pop() s2=[]
+stack2.push(8.0) s2=[8.0]
+stack1<stack2 is True
+
+
+9-10 什么叫作队列？对队列中元素的操作有和特性？
+
+
+解： 
+队列是只能向一端添加元素，从另一端删除元素的线性群体，可以添加元素的一端称队尾，可以删除元素的一端称队头。对队头位置的标记称为队头指针，对队尾位置的标记称为队尾指针。向队尾添加元素称为“入队”，删除队头元素称为“出队”。队列中元素的添加和删除操作具有“先进先出”（FIFO）的特性。
+
+
+9-11 在标准C++类库中，队列类（queue）的成员函数queue::push()在队列一端添加元素，queue::pop()从非空的队列中删除最后一个元素，queue::empty()判断队列是否为空， queue::back()返回非空队列的最后一个元素，queue::front()返回非空队列的第一个元素，queue::size()返回队列中元素的个数，请构造一个整型队列和一个字符型队列，然后对这两个队列调用以上几个函数，体会队列这种数据结构的特点和其成员函数的用法。
+
+
+解： 
+#include <iostream>
+#include <queue>
+
+using namespace std ;
+
+typedef queue<int> INTQUEUE;
+
+typedef queue<char*> CHARQUEUE;
+
+void main(void)
+{
+int size_q;
+INTQUEUE q;
+CHARQUEUE p;
+
+// Insert items in the queue(uses list)
+q.push(42);
+q.push(100);
+q.push(49);
+q.push(201);
+// Output the size of queue
+size_q = q.size();
+cout << "size of q is:" << size_q << endl;
+
+// Output items in queue using front()
+// and use pop() to get to next item until
+// queue is empty
+while (!q.empty())
+{
+cout << q.front() << endl;
+q.pop();
+
+}
+
+// Insert items in the queue(uses deque)
+p.push("cat");
+p.push("ape");
+p.push("dog");
+p.push("mouse");
+p.push("horse");
+
+// Output the item inserted last using back()
+cout << p.back() << endl;
+
+// Output the size of queue
+size_q = p.size();
+cout << "size of p is:" << size_q << endl;
+
+// Output items in queue using front()
+// and use pop() to get to next item until
+// queue is empty
+while (!p.empty())
+{
+cout << p.front() << endl;
+p.pop();
+
+}
+}
+
+程序运行输出：
+size of q is:4
+42
+100
+49
+201
+horse
+size of p is:5
+cat
+ape
+dog
+mouse
+horse
+
+
+9-12 实际应用中，双向队列比普通队列更加常用。在标准C++类库中，双向队列类（deque）的成员函数queue::assign ()给一个双向队列重新赋值，queue::swap()交换两个双向队列中的元素，queue::begin()返回指向双向队列中的第一个元素的指针，queue:: end()返回指向双向队列中的最后一个元素的指针，请构造一个整型双向队列，然后对这个队列调用以上几个函数，体会队列这种数据结构的特点和其成员函数的用法。
+
+
+解： 
+#include <iostream>
+#include <deque>
+
+using namespace std;
+
+typedef deque<char > CHARDEQUE;
+void print_contents (CHARDEQUE deque, char*);
+
+void main()
+{
+//create a with 3 A's
+CHARDEQUE a(3,'A');
+
+//create b with 4 B's.
+CHARDEQUE b(4,'B');
+
+//print out the contents
+print_contents (a,"a");
+print_contents (b,"b");
+
+//swap a and b
+a.swap(b);
+print_contents (a,"a");
+print_contents (b,"b");
+
+// let us swap it back
+a.swap(b);
+print_contents (a,"a");
+print_contents (b,"b");
+
+//assign the contents of b to a
+a.assign(b.begin(),b.end());
+print_contents (a,"a");
+
+//assign the first two items of b to a
+a.assign(b.begin(),b.begin()+2);
+print_contents (a,"a");
+
+//assign 3 'Z's to a
+a.assign(3,'Z');
+print_contents (a,"a");
+
+}
+
+//function to print the contents of deque
+void print_contents (CHARDEQUE deque, char *name)
+{
+CHARDEQUE::iterator pdeque;
+
+cout <<"The contents of "<< name <<" : ";
+
+for(pdeque = deque.begin();
+pdeque != deque.end();
+pdeque++)
+{
+cout << *pdeque <<" " ;
+}
+cout<<endl;
+}
+
+程序运行输出：
+The contents of a : A A A
+The contents of b : B B B B
+The contents of a : B B B B
+The contents of b : A A A
+The contents of a : A A A
+The contents of b : B B B B
+The contents of a : B B B B
+The contents of a : B B
+The contents of a : Z Z Z
+
+
+9-13 在标准C++类库中，双向队列类（deque）的成员函数queue::front()返回一个非空双向队列的第一个元素，queue:: back()返回一个非空双向队列的最后一个元素，请构造一个字符型双向队列，体会这几个成员函数的用法。
+
+
+解： 
+#include <iostream>
+#include <deque>
+
+using namespace std;
+
+typedef deque<char > CHARDEQUE;
+void print_contents (CHARDEQUE deque, char*);
+
+void main()
+{
+//create a with A, B, C and D
+CHARDEQUE a;
+a.push_back('A');
+a.push_back('B');
+a.push_back('C');
+a.push_back('D');
+
+//print out the contents
+print_contents (a,"a");
+
+cout <<"The first element of a is " <<a.front() <<endl;
+
+cout <<"The last element of a is " <<a.back() <<endl;
+
+//now let us modify the first and last elements
+//using reference ,front() and back()
+
+CHARDEQUE::reference reffront=a.front();
+CHARDEQUE::reference refback=a.back();
+
+reffront='X';
+refback='Y';
+
+//print out the contents
+print_contents (a,"a");
+
+}
+
+//function to print the contents of deque
+void print_contents (CHARDEQUE deque, char *name)
+{
+CHARDEQUE::iterator pdeque;
+
+cout <<"The contents of "<< name <<" : ";
+
+for(pdeque = deque.begin();
+pdeque != deque.end();
+pdeque++)
+{
+cout << *pdeque <<" " ;
+}
+cout<<endl;
+}
+
+程序运行输出：
+The contents of a : A B C D
+
+The first element of a is A
+
+The last element of a is D
+
+The contents of a : X B C Y
+
+9-14 在标准C++类库中，双向队列类（deque）的成员函数queue::insert()往一个双向队列中插入元素，queue::push_front(const T& x)往一个双向队列的头端插入一个元素，queue::pop_front()从一个双向队列的头端删除一个元素，queue::push_back(const T& x)往一个双向队列的尾端插入一个元素，queue::pop_back(const T& x)从一个双向队列的尾端删除一个元素，请构造一个字符型双向队列，体会这几个成员函数的用法。
+
+
+解： 
+#include <iostream>
+#include <deque>
+
+using namespace std;
+
+
+typedef deque<char > CHARDEQUE;
+void print_contents (CHARDEQUE deque);
+
+void main()
+{
+//create a with 3 A's
+CHARDEQUE a(3,'A');
+
+//create b with 2 B's.
+CHARDEQUE b(2,'B');
+
+//print out the contents
+print_contents (a);
+print_contents (b);
+
+//insert 'X' to the beginning of a
+a.insert(a.begin(),'X');
+print_contents (a);
+
+//insert 'Y' to the end of a
+a.insert(a.end(),'Y');
+print_contents (a);
+
+//inset 3 'Z's to one item before the end of a
+a.insert(a.end()-1,3,'Z');
+print_contents (a);
+
+//insert to the end of a from b
+a.insert(a.end(),b.begin(),b.end());
+print_contents (a);
+
+}
+
+//function to print the contents of deque
+void print_contents (CHARDEQUE deque)
+{
+CHARDEQUE::iterator pdeque;
+
+cout <<"The output is: ";
+
+for(pdeque = deque.begin();
+pdeque != deque.end();
+pdeque++)
+{
+cout << *pdeque <<" " ;
+}
+cout<<endl;
+}
+
+程序运行输出：
+The output is: A A A
+The output is: B B
+The output is: X A A A
+The output is: X A A A Y
+The output is: X A A A Z Z Z Y
+The output is: X A A A Z Z Z Y B B
+
+
+9-15 在标准C++类库中，双向队列类（deque）的长度是可变的，成员函数resize( n, T x = T())可加长已有的双向队列对象，size() const返回队列长度，max_size() const返回系统可支持的最大双向队列长度，请构造一个字符型双向队列，体会这几个成员函数的用法。
+
+
+解： 
+#include <iostream>
+#include <deque>
+
+using namespace std;
+
+
+typedef deque<char > CHARDEQUE;
+void print_contents (CHARDEQUE deque, char*);
+
+void main()
+{
+//create a with A, B, C and D
+CHARDEQUE a;
+a.push_back('A');
+a.push_back('B');
+a.push_back('C');
+a.push_back('D');
+
+//print out the contents
+
+print_contents (a,"a");
+cout <<"max_size of a is " <<a.max_size() <<endl;
+cout <<"size of a is " <<a.size() <<endl;
+
+//let us increase the size to 10
+// and set the new elements to be 'X'
+a.resize(10,'X');
+print_contents (a,"a");
+cout <<"size of a is " <<a.size() <<endl;
+
+//let us resize it to 5
+a.resize(5);
+print_contents (a,"a");
+cout <<"size of a is " <<a.size() <<endl;
+cout <<"max_size of a is still " <<a.max_size() <<endl;
+
+}
+
+//function to print the contents of deque
+void print_contents (CHARDEQUE deque, char *name)
+{
+CHARDEQUE::iterator pdeque;
+
+cout <<"The contents of "<< name <<" : ";
+
+for(pdeque = deque.begin();
+pdeque != deque.end();
+pdeque++)
+{
+cout << *pdeque <<" " ;
+}
+cout<<endl;
+}
+
+程序运行输出：
+The contents of a : A B C D
+max_size of a is 4294967295
+size of a is 4
+The contents of a : A B C D X X X X X X
+size of a is 10
+The contents of a : A B C D X
+size of a is 5
+max_size of a is still 4294967295
+
+ 
+
+9-16 深度为n的二叉树的最大节点数是多少？有以下节点数的二叉树的最小深度为多少？1) 5； 2) 9； 3) 25； 4) 250。
+
+
+解： 
+深度为n的二叉树的最大节点数为2n+1-1；
+以上二叉树的最小深度为：1)2； 2)3； 3) 4； 4) 7
+
+
+9-17 请建立如图所示的一个简单的二叉树，结点数据类型为字符型。
+
+解： 
+//nodetree.h 即为教材中例程9-11，参见教材第9章
+#ifndef TREENODE_CLASS 
+#define TREENODE_CLASS
+
+#ifndef NULL
+const int NULL = 0;
+#endif // NULL
+
+template <class T>
+class TreeNode
+{
+private:
+TreeNode<T> *left; //左指针
+TreeNode<T> *right; //右指针
+
+public:
+T data; //结点数据
+
+// 构造函数
+TreeNode (const T& item, TreeNode<T> *lptr = NULL,
+TreeNode<T> *rptr = NULL);
+
+// 访问指针域的函数
+TreeNode<T>* Left(void) const; //取得左指针
+TreeNode<T>* Right(void) const; //取得右指针
+
+// 删除当前结点的左右子树
+void release();
+};
+
+// 构造函数，初始化数据域和指针域
+template <class T>
+TreeNode<T>::TreeNode (const T& item, TreeNode<T> *lptr,
+TreeNode<T> *rptr): data(item), left(lptr), right(rptr)
+{}
+
+//取得左指针
+template <class T>
+TreeNode<T>* TreeNode<T>::Left(void) const
+{
+return left;
+}
+
+//取得右指针
+template <class T>
+TreeNode<T>* TreeNode<T>::Right(void) const
+{
+return right;
+}
+
+// 删除当前结点的左右子树
+template <class T>
+void TreeNode<T>::release()
+{
+if(left)
+{ //删除左子树
+left->release();
+delete left;
+left=NULL;
+}
+if(right)
+{ //删除右子树
+right->release();
+delete right;
+right=NULL;
+}
+}
+
+#endif // TREENODE_CLASS
+
+//test9_17.cpp
+#include <iostream.h>
+#include "treenode.h"
+
+void main(void)
+{
+TreeNode<char> D('D'),E('E');
+TreeNode<char> B('B',&D,&E),C('C');
+TreeNode<char> A('A',&B,&C);
+}
+
+ 

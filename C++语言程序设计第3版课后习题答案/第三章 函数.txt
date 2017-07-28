@@ -1,0 +1,372 @@
+第三章      函数
+
+
+3-1 C++中的函数是什么？什么叫主调函数，什么叫被调函数，二者之间有什么关系？如何调用一个函数？ 
+
+解： 
+一个较为复杂的系统往往需要划分为若干子系统，高级语言中的子程序就是用来实现这种模块划分的。C和C++语言中的子程序就体现为函数。调用其它函数的函数被称为主调函数，被其它函数调用的函数称为被调函数。一个函数很可能既调用别的函数又被另外的函数调用，这样它可能在某一个调用与被调用关系中充当主调函数，而在另一个调用与被调用关系中充当被调函数。
+调用函数之前先要声明函数原型。按如下形式声明：
+类型标识符 被调函数名 (含类型说明的形参表);
+声明了函数原型之后，便可以按如下形式调用子函数：
+函数名（实参列表）
+
+
+3-2 观察下面程序的运行输出，与你设想的有何不同？仔细体会引用的用法。
+
+
+源程序：
+#include <iostream.h> 
+
+int main()
+{
+int intOne;
+int &rSomeRef = intOne;
+
+intOne = 5;
+cout << "intOne:\t\t" << intOne << endl;
+cout << "rSomeRef:\t" << rSomeRef << endl;
+
+int intTwo = 8;
+rSomeRef = intTwo; // not what you think!
+cout << "\nintOne:\t\t" << intOne << endl;
+cout << "intTwo:\t\t" << intTwo << endl;
+cout << "rSomeRef:\t" << rSomeRef << endl;
+return 0;
+}
+程序运行输出：
+intOne: 5
+rSomeRef: 5
+
+intOne: 8
+intTwo: 8
+rSomeRef: 8
+
+3-3 比较值调用和引用调用的相同点与不同点。
+
+
+解： 
+值调用是指当发生函数调用时，给形参分配内存空间，并用实参来初始化形参（直接将实参的值传递给形参）。这一过程是参数值的单向传递过程，一旦形参获得了值便与实参脱离关系，此后无论形参发生了怎样的改变，都不会影响到实参。
+引用调用将引用作为形参，在执行主调函数中的调用语句时，系统自动用实参来初始化形参。这样形参就成为实参的一个别名，对形参的任何操作也就直接作用于实参。
+
+
+3-4 什么叫内联函数?它有哪些特点？
+
+
+解： 
+定义时使用关键字 inline的函数叫做内联函数；
+编译器在编译时在调用处用函数体进行替换,节省了参数传递、控制转移等开销；
+内联函数体内不能有循环语句和switch语句；
+内联函数的定义必须出现在内联函数第一次被调用之前；
+对内联函数不能进行异常接口声明；
+
+
+3-5 函数原型中的参数名与函数定义中的参数名以及函数调用中的参数名必须一致吗？
+
+
+解： 
+不必一致，所有的参数是根据位置和类型而不是名字来区分的。 
+
+3-6 重载函数时通过什么来区分？
+
+
+解： 
+重载的函数的函数名是相同的，但它们的参数的个数和数据类型不同，编译器根据实参和形参的类型及个数的最佳匹配，自动确定调用哪一个函数。
+
+3-7 编写函数，参数为两个unsigned short int型数，返回值为第一个参数除以第二个参数的结果，数据类型为short int；如果第二个参数为0，则返回值为-1。在主程序中实现输入输出。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+short int Divider(unsigned short int a, unsigned short int b)
+{
+if (b == 0)
+return -1;
+else
+return a/b;
+}
+
+typedef unsigned short int USHORT;
+typedef unsigned long int ULONG;
+int main()
+{
+USHORT one, two;
+short int answer;
+cout << "Enter two numbers.\n Number one: ";
+cin >> one;
+cout << "Number two: ";
+cin >> two;
+answer = Divider(one, two);
+if (answer > -1)
+cout << "Answer: " << answer;
+else
+cout << "Error, can't divide by zero!";
+return 0;
+}
+程序运行输出：
+Enter two numbers.
+Number one:8
+Number two:2
+Answer: 4
+
+
+3-8 编写函数把华氏温度转换为摄氏温度，公式为：C = (F - 32) * 5/9; 在主程序中提示用户输入一个华氏温度，转化后输出相应的摄氏温度。
+
+
+解： 
+源程序见"实验指导"部分实验三
+
+
+3-9 编写函数判断一个数是否是质数，在主程序中实现输入、输出。
+
+
+解： 
+#include <iostream.h>
+#include <math.h>
+
+int prime(int i); //判一个数是否是质数的函数
+
+void main()
+{
+int i;
+cout << "请输入一个整数：";
+cin >> i;
+if (prime(i))
+cout << i << "是质数." << endl;
+else
+cout << i << "不是质数." << endl;
+}
+
+int prime(int i)
+{
+int j,k,flag;
+flag = 1;
+k = sqrt(i);
+for (j = 2; j <= k; j++)
+{
+if(i%j == 0)
+{
+flag = 0;
+break;
+}
+}
+if (flag)
+return 1;
+else
+return 0;
+}
+程序运行输出：
+请输入一个整数：1151
+1151是质数.
+
+3-10 编写函数求两个整数的最大公约数和最小公倍数。
+
+
+解： 
+源程序：
+#include <iostream.h>
+#include <math.h>
+
+int fn1(int i,int j); //求最大公约数的函数
+
+void main()
+{
+int i,j,x,y;
+cout << "请输入一个正整数：";
+cin >> i ;
+cout << "请输入另一个正整数：";
+cin >> j ;
+
+x = fn1(i,j);
+y = i * j / x;
+cout << i << "和" << j << "的最大公约数是：" << x << endl;
+cout << i << "和" << j << "的最小公倍数是：" << y << endl;
+}
+
+int fn1(int i, int j)
+{
+int temp;
+if (i < j)
+{
+temp = i;
+i = j;
+j = i;
+}
+while(j != 0)
+{
+temp = i % j;
+i = j;
+j = temp;
+}
+return i;
+}
+程序运行输出：
+请输入一个正整数：120
+请输入另一个正整数：72
+120和72的最大公约数是：24
+120和72的最小公倍数是：360
+
+
+3-11 什么叫作嵌套调用？什么叫作递归调用？
+
+
+解： 
+函数允许嵌套调用，如果函数1调用了函数2，函数2再调用函数3，便形成了函数的嵌套调用。
+函数可以直接或间接地调用自身，称为递归调用。
+
+
+3-12 在主程序中提示输入整数n，编写函数用递归的方法求1 + 2 + … + n的值。
+
+
+解： 
+#include <iostream.h>
+#include <math.h>
+
+int fn1(int i);
+
+void main()
+{
+int i;
+cout << "请输入一个正整数：";
+cin >> i ;
+
+cout << "从1累加到" <<i << "的和为：" << fn1(i) << endl;
+}
+
+int fn1(int i)
+{
+if (i == 1)
+return 1;
+else
+return i + fn1(i -1);
+}
+程序运行输出： 
+请输入一个正整数：100
+从1累加到100的和为：5050
+
+
+3-13 编写递归函数GetPower(int x， int y)计算x的y次幂， 在主程序中实现输入输出。
+
+
+解： 
+源程序：
+#include <iostream.h>
+long GetPower(int x， int y);
+int main()
+{
+int number， power;
+long answer;
+cout << "Enter a number: ";
+cin >> number;
+cout << "To what power? ";
+cin >> power;
+answer = GetPower(number，power);
+cout << number << " to the " << power << "th power is " <<answer << endl;
+return 0;
+}
+
+long GetPower(int x， int y)
+{
+if(y == 1)
+return x;
+else
+return (x * GetPower(x，y-1));
+}
+程序运行输出：
+Enter a number: 3
+To what power? 4
+3 to the 4th power is 81
+
+
+3-14 用递归的方法编写函数求Fibonacci 级数，公式为fib(n) = fib(n-1) + fib(n-2)，n>2; 
+fib(1) = fib(2) = 1;观察递归调用的过程。
+
+
+解： 
+源程序见"实验指导"部分实验三
+
+
+3-15 用递归的方法编写函数求n阶勒让德多项式的值，在主程序中实现输入、输出；
+
+解： 
+#include <iostream.h>
+
+float p(int n, int x);
+
+void main()
+{
+int n,x;
+cout << "请输入正整数n：";
+cin >> n;
+cout << "请输入正整数x：";
+cin >> x;
+
+cout << "n = " << n << endl;
+cout << "x = " << x << endl;
+cout << "P" << n << "(" << x << ") = " << p(n,x) << endl;
+}
+
+float p(int n, int x)
+{
+if (n == 0)
+return 1;
+else if (n == 1)
+return x;
+else
+return ((2*n-1)*x*p(n-1,x) - (n-1)*p(n-2,x)) /n ;
+}
+程序运行输出：
+请输入正整数n：1
+请输入正整数x：2
+n = 1
+x = 2
+P1(2) = 2
+
+请输入正整数n：3
+请输入正整数x：4
+n = 3
+x = 4
+P3(4) = 154
+
+
+3-16 使用模板函数实现Swap( x， y )，函数功能为交换x、y的值。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+template <typename T> void swap(T &x， T &y)
+{
+T z;
+z = x;
+x = y;
+y = z;
+}
+
+void main()
+{
+int j = 1， k = 2;
+double v = 3.0， w = 4.0;
+cout << "j = " <<j << " k = " << k << endl;
+cout << "v = " <<v << " w = " << w << endl;
+swap(j， k); //int
+swap(v， w); //double
+cout << "After swap:" << endl;
+cout << "j = " <<j << " k = " << k << endl;
+cout << "v = " <<v << " w = " << w << endl;
+}
+程序运行输出：
+j = 1 k = 2
+v = 3.14 w = 4.35
+After swap:
+j = 2 k = 1
+v = 4.35 w = 3.14
+
+
+
+
+ 
+
+  

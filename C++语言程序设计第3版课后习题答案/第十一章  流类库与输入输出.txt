@@ -1,0 +1,254 @@
+ 第 十一 章       流类库与输入/输出
+
+
+11-1 什么叫做流？流的提取和插入是指什么？I/O流在C++中起着怎样的作用？
+
+
+解： 
+流是一种抽象，它负责在数据的生产者和数据的消费者之间建立联系，并管理数据的流动，一般意义下的读操作在流数据抽象中被称为（从流中）提取，写操作被称为（向流中）插入。操作系统是将键盘、屏幕、打印机和通信端口作为扩充文件来处理的，I/O流类就是用来与这些扩充文件进行交互，实现数据的输入与输出。
+
+
+11-2 cerr和clog有何区别？
+
+
+解： 
+cerr 标准错误输出，没有缓冲，发送给它的内容立即被输出，适用于立即向屏幕输出的错误信息；clog 类似于cerr，但是有缓冲，缓冲区满时被输出，在向磁盘输出时效率更高。
+
+
+11-3 使用I/O流以文本方式建立一个文件test1.txt，写入字符“已成功写入文件！”，用其它字处理程序（例如windows的记事本程序Notepad）打开，看看是否正确写入。
+
+
+解： 
+#include <fstream.h> 
+
+void main() 
+{
+ofstream file1("test.txt");
+file1 << "已成功写入文件！";
+file1.close();
+}
+
+程序运行后test1.txt的内容为：已成功写入文件！
+
+
+11-4 使用I/O流以文本方式打开上一题建立的文件test1.txt，读出其内容显示出来，看看是否正确。
+
+
+解： 
+#include <fstream.h>
+
+void main() 
+{
+char ch;
+ifstream file2("test.txt");
+while (file2.get(ch))
+cout << ch;
+file2.close();
+}
+
+程序运行输出：
+已成功写入文件！
+
+
+11-5 使用I/O流以文本方式打开上题建立的文件test1.txt，在次此文件后面添加字符“已成功添加字符！”，然后读出整个文件的内容显示出来，看看是否正确。
+
+
+解： 
+#include <fstream.h>
+
+void main() 
+{
+ofstream file1("test.txt",ios::app);
+file1 << "已成功添加字符！";
+file1.close ();
+char ch;
+ifstream file2("test.txt");
+while (file2.get(ch))
+cout << ch;
+file2.close();
+
+}
+
+程序运行输出：
+已成功写入文件！已成功添加字符！
+
+
+11-6 定义一个dog类，包含体重和年龄两个成员变量及相应的成员函数，声明一个实例dog1，体重为5，年龄为10，使用I/O流把dog1的状态写入磁盘文件，再声明另一个实例dog2，通过读文件把dog1的状态赋给dog2。分别使用文本方式和二进制方式操作文件，看看结果有何不同；再看看磁盘文件的ASCII码有何不同。
+
+
+解： 
+以两种方式操作，程序运行结果一样，但磁盘文件的ASCII码不同，使用二进制方式时，磁盘文件的ASCII码为05 00 00 00 0A 00 00 00，使用文本方式时，磁盘文件的ASCII码为05 00 00 00 0D 0A 00 00 00，这是因为此时系统自动把0A转换为了0D 0A。
+#include <fstream.h>
+
+class dog
+{
+public:
+dog(int weight, long days):itsWeight(weight),
+itsNumberDaysAlive(days){}
+~dog(){}
+
+int GetWeight()const { return itsWeight; }
+void SetWeight(int weight) { itsWeight = weight; }
+
+long GetDaysAlive()const { return itsNumberDaysAlive; }
+void SetDaysAlive(long days) { itsNumberDaysAlive = days; }
+
+private:
+int itsWeight;
+long itsNumberDaysAlive;
+};
+
+int main() // returns 1 on error
+{
+char fileName[80];
+
+cout << "Please enter the file name: ";
+cin >> fileName;
+ofstream fout(fileName);
+// ofstream fout(fileName,ios::binary);
+if (!fout)
+{
+cout << "Unable to open " << fileName << " for writing.\n";
+return(1);
+}
+
+dog Dog1(5,10);
+fout.write((char*) &Dog1,sizeof Dog1);
+
+fout.close();
+
+ifstream fin(fileName);
+// ifstream fin(fileName,ios::binary);
+if (!fin)
+{
+cout << "Unable to open " << fileName << " for reading.\n";
+return(1);
+}
+
+dog Dog2(2,2);
+
+cout << "Dog2 weight: " << Dog2.GetWeight() << endl;
+cout << "Dog2 days: " << Dog2.GetDaysAlive() << endl;
+
+fin.read((char*) &Dog2, sizeof Dog2);
+
+cout << "Dog2 weight: " << Dog2.GetWeight() << endl;
+cout << "Dog2 days: " << Dog2.GetDaysAlive() << endl;
+fin.close();
+return 0;
+}
+
+程序运行输出：
+Please enter the file name: a
+Dog2 weight: 2
+Dog2 days: 2
+Dog2 weight: 5
+Dog2 days: 10
+
+
+11-7 观察下面的程序，说明每条语句的作用，看看程序执行的结果。
+#include <iostream>
+using namespace ::std;
+
+void main()
+{
+ios_base::fmtflags original_flags = cout.flags(); //1 
+cout<< 812<<'|';
+cout.setf(ios_base::left,ios_base::adjustfield); //2
+cout.width(10); //3
+cout<< 813 << 815 << '\n';
+cout.unsetf(ios_base::adjustfield); //4
+cout.precision(2);
+cout.setf(ios_base::uppercase|ios_base::scientific); //5
+cout << 831.0 ;
+
+cout.flags(original_flags); //6
+}
+
+
+解： 
+//1保存现在的格式化参数设置，以便将来恢复这些设置；
+//2 把对齐方式由缺省的右对齐改为左对齐；
+//3 把输出域的宽度由缺省值0改为10；
+//4 清除对齐方式的设置；
+//5 更改浮点数的显示设置；
+//6 恢复原来的格式化参数设置。
+
+程序运行输出：
+812|813 815
+8.31E+02
+
+
+11-8 提示用户输入一个十进制整数，分别用十进制、八进制和十六进制形式输出。
+
+
+解： 
+#include <iostream.h>
+
+void main() {
+int n;
+cout << "请输入一个十进制整数：";
+cin >> n;
+cout << "这个数的十进制形式为：" << dec << n << endl;
+cout << "这个数的八进制形式为：" << oct << n << endl;
+cout << "这个数的十六进制形式为：" << hex << n << endl;
+} 
+
+程序运行输出：
+请输入一个十进制整数：15
+这个数的十进制形式为：15
+这个数的八进制形式为：17
+这个数的十六进制形式为：f
+
+
+11-9 编写程序实现如下功能：打开指定的一个文本文件，在每一行前加行号。
+
+
+解： 
+//b.cpp
+#include <fstream.h>
+#include <strstrea.h>
+#include <stdlib.h>
+
+void main(int argc, char* argv[])
+{
+
+strstream textfile;
+{
+ifstream in(argv[1]);
+textfile << in.rdbuf();
+}
+ofstream out(argv[1]); 
+
+const int bsz = 100;
+char buf[bsz];
+int line = 0;
+while(textfile.getline(buf, bsz)) {
+out.setf(ios::right, ios::adjustfield);
+out.width(1);
+out << ++line << ". " << buf << endl;
+}
+}
+
+编译后运行程序b text1.txt
+运行前text1.txt的内容为：
+aaaaaaaaaaaa
+bbbbbbbbbbbb
+cccccccccccc
+dddddddddddd
+eeeeeeeeeeee
+ffffffffffff
+gggggggggggg
+hhhhhhhhhhhh
+
+运行后text1.txt的内容为：
+1. aaaaaaaaaaaa
+2. bbbbbbbbbbbb
+3. cccccccccccc
+4. dddddddddddd
+5. eeeeeeeeeeee
+6. ffffffffffff
+7. gggggggggggg
+8. hhhhhhhhhhhh
+
+ 

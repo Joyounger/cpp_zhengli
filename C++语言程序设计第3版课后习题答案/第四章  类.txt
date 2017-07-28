@@ -1,0 +1,342 @@
+ 第 四 章           类
+
+
+4-1 解释public和private的作用，公有类型成员与私有类型成员有些什么区别？
+
+
+解： 
+公有类型成员用public关键字声明，公有类型定义了类的外部接口；私有类型的成员用private关键字声明，只允许本类的函数成员来访问，而类外部的任何访问都是非法的，这样，私有的成员就整个隐蔽在类中，在类的外部根本就无法看到，实现了访问权限的有效控制。
+
+
+4-2 protected关键字有何作用？
+
+
+解： 
+protected用来声明保护类型的成员，保护类型的性质和私有类型的性质相似，其差别在于继承和派生时派生类的成员函数可以访问基类的保护成员。
+
+
+4-3 构造函数和析构函数有什么作用？
+
+
+解： 
+构造函数的作用就是在对象被创建时利用特定的值构造对象，将对象初始化为一个特定的状态，使此对象具有区别于彼对象的特征，完成的就是是一个从一般到具体的过程，构造函数在对象创建的时候由系统自动调用。
+析构函数与构造函数的作用几乎正好相反，它是用来完成对象被删除前的一些清理工作，也就是专门作扫尾工作的。一般情况下，析构函数是在对象的生存期即将结束的时刻由系统自动调用的，它的调用完成之后，对象也就消失了，相应的内存空间也被释放。
+
+
+4-4 数据成员可以为公有的吗？成员函数可以为私有的吗？
+
+
+解： 
+可以，二者都是合法的。数据成员和成员函数都可以为公有或私有的。但数据成员最好定义为私有的。
+
+
+4-5 已知class A中有数据成员int a，如果定义了A的两个对象A1、A2，它们各自的数据成员a的值可以不同吗？
+
+
+解： 
+可以，类的每一个对象都有自己的数据成员。 
+
+4-6 什么叫做拷贝构造函数？拷贝构造函数何时被调用？
+
+
+解： 
+拷贝构造函数是一种特殊的构造函数，具有一般构造函数的所有特性，其形参是本类的对象的引用，其作用是使用一个已经存在的对象，去初始化一个新的同类的对象。在以下三种情况下会被调用：在当用类的一个对象去初始化该类的另一个对象时；如果函数的形参是类对象，调用函数进行形参和实参结合时；如果函数的返回值是类对象，函数调用完成返回时；
+
+
+4-7 拷贝构造函数与赋值运算符(=)有何不同？
+
+
+解： 
+赋值运算符(=)作用于一个已存在的对象；而拷贝构造函数会创建一个新的对象。
+
+
+4-8 定义一个Dog 类，包含的age、weight等属性，以及对这些属性操作的方法。实现并测试这个类。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Dog
+{
+public:
+Dog (int initialAge = 0， int initialWeight = 5);
+~Dog();
+int GetAge() { return itsAge;} // inline!
+void SetAge (int age) { itsAge = age;} // inline!
+int GetWeight() { return itsWeight;} // inline!
+void SetWeight (int weight) { itsAge = weight;} // inline!
+private:
+int itsAge， itsWeight;
+};
+
+Dog::Dog(int initialAge， int initialWeight)
+{
+itsAge = initialAge;
+itsWeight = initialWeight;
+}
+
+Dog::~Dog() //destructor， takes no action
+{
+}
+
+int main()
+{
+Dog Jack(2，10);
+cout << "Jack is a Dog who is " ;
+cout << Jack.GetAge() << " years old and";
+cout << Jack.GetWeight() << " pounds weight.\n";
+Jack.SetAge(7);
+Jack.SetWeight(20);
+cout << "Now Jack is " ;
+cout << Jack.GetAge() << " years old and";
+cout << Jack.GetWeight() << " pounds weight.";
+
+return 0;
+}
+程序运行输出：
+Jack is a Dog who is 2 years old and 10 pounds weight.
+Now Jack is 7 years old 20 pounds weight.
+
+
+4-9 设计并测试一个名为Rectangle的矩形类，其属性为矩形的左下角与右上角两个点的坐标，能计算矩形的面积。
+
+
+解： 
+源程序：
+#include <iostream.h>
+class Rectangle
+{
+public:
+Rectangle (int top, int left, int bottom, int right);
+~Rectangle () {}
+
+int GetTop() const { return itsTop; }
+int GetLeft() const { return itsLeft; }
+int GetBottom() const { return itsBottom; }
+int GetRight() const { return itsRight; }
+
+void SetTop(int top) { itsTop = top; }
+void SetLeft (int left) { itsLeft = left; }
+void SetBottom (int bottom) { itsBottom = bottom; }
+void SetRight (int right) { itsRight = right; }
+
+int GetArea() const;
+
+private:
+int itsTop;
+int itsLeft;
+int itsBottom;
+int itsRight;
+};
+Rectangle::Rectangle(int top, int left, int bottom, int right)
+{
+itsTop = top;
+itsLeft = left;
+itsBottom = bottom;
+itsRight = right;
+}
+
+int Rectangle::GetArea() const
+{
+int Width = itsRight-itsLeft;
+int Height = itsTop - itsBottom;
+return (Width * Height);
+}
+
+int main()
+{
+Rectangle MyRectangle (100, 20, 50, 80 );
+
+int Area = MyRectangle.GetArea();
+
+cout << "Area: " << Area << "\n";
+return 0;
+}
+程序运行输出：
+Area: 3000
+Upper Left X Coordinate: 20
+
+
+4-10 设计一个用于人事管理的People（人员）类。考虑到通用性，这里只抽象出所有类型人员都具有的属性：number（编号）、sex（性别）、birthday（出生日期）、id（身份证号）等等。其中"出生日期"定义为一个"日期"类内嵌子对象。用成员函数实现对人员信息的录入和显示。要求包括：构造函数和析构函数、拷贝构造函数、内联成员函数、带缺省形参值的成员函数、聚集。
+
+
+解： 
+本题用作实验四的选做题，因此不给出答案。
+
+
+4-11 定义一个矩形类，有长、宽两个属性，有成员函数计算矩形的面积 
+
+
+解： 
+#include <iostream.h>
+
+class Rectangle
+{
+public:
+Rectangle(float len, float width)
+{
+Length = len;
+Width = width;
+}
+~Rectangle(){};
+float GetArea() { return Length * Width; }
+float GetLength() { return Length; }
+float GetWidth() { return Width; }
+private:
+float Length;
+float Width;
+};
+
+void main()
+{
+float length, width;
+cout << "请输入矩形的长度：";
+cin >> length;
+cout << "请输入矩形的宽度：";
+cin >> width;
+Rectangle r(length, width);
+cout << "长为" << length << "宽为" << width << "的矩形的面积为：" 
+<< r.GetArea () << endl;
+}
+
+程序运行输出：
+请输入矩形的长度：5
+请输入矩形的宽度：4
+长为5宽为4的矩形的面积为：20
+
+
+4-12 定义一个"数据类型" datatype类，能处理包含字符型、整型、浮点型三种类型的数据，给出其构造函数。
+
+
+解： 
+#include <iostream.h>
+
+class datatype{
+enum{
+character,
+integer,
+floating_point
+} vartype;
+union 
+{
+char c;
+int i;
+float f;
+};
+public:
+datatype(char ch) {
+vartype = character;
+c = ch;
+}
+datatype(int ii) {
+vartype = integer;
+i = ii;
+}
+datatype(float ff) {
+vartype = floating_point;
+f = ff;
+}
+void print();
+};
+
+void datatype::print() {
+switch (vartype) {
+case character:
+cout << "字符型: " << c << endl;
+break;
+case integer:
+cout << "整型: " << i << endl;
+break;
+case floating_point:
+cout << "浮点型: " << f << endl;
+break;
+}
+}
+
+void main() {
+datatype A('c'), B(12), C(1.44F);
+A.print();
+B.print();
+C.print();
+}
+
+程序运行输出：
+字符型: c
+整型: 12
+浮点型: 1.44
+
+
+4-13 定义一个Circle类，有数据成员半径Radius，成员函数GetArea()，计算圆的面积，构造一个Circle的对象进行测试。
+
+
+解： 
+#include <iostream.h>
+
+class Circle
+{
+public:
+Circle(float radius){ Radius = radius;}
+~Circle(){}
+float GetArea() { return 3.14 * Radius * Radius; }
+private:
+float Radius;
+};
+
+void main()
+{
+float radius;
+cout << "请输入圆的半径：";
+cin >> radius;
+Circle p(radius);
+cout << "半径为" << radius << "的圆的面积为：" << p.GetArea () 
+<< endl;
+}
+
+程序运行输出：
+请输入圆的半径：5
+半径为5的圆的面积为：78.5
+
+
+4-14 定义一个tree类，有成员ages，成员函数grow(int years)对ages加上years,age()显示tree对象的ages的值。
+
+
+解： 
+#include <iostream.h>
+
+class Tree {
+int ages;
+public:
+Tree(int n=0);
+~Tree();
+void grow(int years);
+void age();
+};
+
+Tree::Tree(int n) {
+ages = n;
+}
+
+Tree::~Tree() {
+age();
+}
+
+void Tree::grow(int years) {
+ages += years;
+}
+
+void Tree::age() {
+cout << "这棵树的年龄为" << ages << endl;
+}
+
+void main()
+{
+Tree t(12);
+
+t.age();
+t.grow(4);
+}
+
+程序运行输出：
+这棵树的年龄为12
+这棵树的年龄为16

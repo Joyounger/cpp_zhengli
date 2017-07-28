@@ -1,0 +1,21 @@
+!MS$FREEFORM
+! Microsoft Developer Studio generated include file.
+! Used by exp13.rc
+!
+      integer, parameter :: IDD_ABOUTBOX                    = 100
+      integer, parameter :: IDR_MAINFRAME                   = 128
+      integer, parameter :: IDR_EXP13TYPE                   = 129
+      integer, parameter :: IDD_DIALOG1                     = 130
+      integer, parameter :: IDD_DIALOG2                     = 131
+      integer, parameter :: IDC_EDIT1                       = 1000
+      integer, parameter :: IDC_EDIT2                       = 1001
+      integer, parameter :: IDC_EDIT3                       = 1002
+      integer, parameter :: IDC_EDIT4                       = 1003
+      integer, parameter :: IDC_EDIT5                       = 1004
+      integer, parameter :: IDC_EDIT6                       = 1005
+      integer, parameter :: IDC_EDIT7                       = 1006
+      integer, parameter :: IDC_EDIT8                       = 1007
+      integer, parameter :: ID_MENUITEM32771                = 32771
+      integer, parameter :: ID_Input_Data                   = 32771
+      integer, parameter :: ID_MENUITEM32772                = 32772
+      integer, parameter :: ID_Find_Name                    = 32772

@@ -1,0 +1,342 @@
+第 五 章        C++程序的基本结构
+
+
+5-1 什么叫做作用域？有哪几种类型的作用域？
+
+
+解： 
+作用域讨论的是标识符的有效范围，作用域是一个标识符在程序正文中有效的区域。C++的作用域分为函数原形作用域、块作用域(局部作用域)、类作用域和文件作用域.
+
+
+5-2 什么叫做可见性？可见性的一般规则是什么？
+
+
+解： 
+可见性是标识符是否可以引用的问题；
+可见性的一般规则是：标识符要声明在前，引用在后，在同一作用域中，不能声明同名的标识符。对于在不同的作用域声明的标识符，遵循的原则是：若有两个或多个具有包含关系的作用域，外层声明的标识符如果在内层没有声明同名标识符时仍可见，如果内层声明了同名标识符则外层标识符不可见。 
+
+
+5-3 下面的程序的运行结果是什么，实际运行一下，看看与你的设想有何不同。
+#include <iostream.h>
+void myFunction(); 
+
+int x = 5， y = 7; 
+int main()
+{
+
+cout << "x from main: " << x << "\n";
+cout << "y from main: " << y << "\n\n";
+myFunction();
+cout << "Back from myFunction!\n\n";
+cout << "x from main: " << x << "\n";
+cout << "y from main: " << y << "\n";
+return 0;
+}
+void myFunction()
+{
+int y = 10;
+
+cout << "x from myFunction: " << x << "\n";
+cout << "y from myFunction: " << y << "\n\n";
+}
+
+
+解： 
+程序运行输出：
+x from main: 5
+y from main: 7
+
+x from myFunction: 5
+y from myFunction: 10
+
+Back from myFunction!
+
+x from main: 5
+y from main: 7
+
+
+ 
+
+5-4 假设有两个无关系的类Engine和Fuel，使用时，怎样允许Fuel成员访问Engine中的私有和保护的成员?
+
+
+解： 
+源程序：
+class fuel;
+class engine
+{
+friend class fuel;
+private;
+int powerlevel;
+public;
+engine(){ powerLevel = 0;}
+void engine_fn(fuel &f);
+};
+class fuel
+{
+friend class engine;
+private;
+int fuelLevel;
+public:
+fuel(){ fuelLevel = 0;}
+void fuel_fn( engine &e);
+};
+
+ 
+
+5-5 什么叫做静态数据成员？它有何特点？
+
+
+解： 
+类的静态数据成员是类的数据成员的一种特例，采用static关键字来声明。对于类的普通数据成员，每一个类的对象都拥有一个拷贝，就是说每个对象的同名数据成员可以分别存储不同的数值，这也是保证对象拥有自身区别于其它对象的特征的需要，但是静态数据成员，每个类只要一个拷贝，由所有该类的对象共同维护和使用，这个共同维护、使用也就实现了同一类的不同对象之间的数据共享。
+
+
+5-6 什么叫做静态函数成员？它有何特点？
+
+
+解： 
+使用static关键字声明的函数成员是静态的，静态函数成员属于整个类，同一个类的所有对象共同维护，为这些对象所共享。静态函数成员具有以下两个方面的好处，一是由于静态成员函数只能直接访问同一个类的静态数据成员，可以保证不会对该类的其余数据成员造成负面影响；二是同一个类只维护一个静态函数成员的拷贝，节约了系统的开销，提高程序的运行效率。
+
+
+5-7 定义一个Cat类，拥有静态数据成员HowManyCats，记录Cat的个体数目；静态成员函数GetHowMany（），存取HowManyCats。设计程序测试这个类，体会静态数据成员和静态成员函数的用法。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Cat
+{
+public:
+Cat(int age):itsAge(age){HowManyCats++; }
+virtual ~Cat() { HowManyCats--; }
+virtual int GetAge() { return itsAge; }
+virtual void SetAge(int age) { itsAge = age; }
+static int GetHowMany() { return HowManyCats; }
+private:
+int itsAge;
+static int HowManyCats;
+};
+
+int Cat::HowManyCats = 0;
+
+void TelepathicFunction();
+
+int main()
+{
+const int MaxCats = 5;
+Cat *CatHouse[MaxCats]; int i;
+for (i = 0; i<MaxCats; i++)
+{
+CatHouse[i] = new Cat(i);
+TelepathicFunction();
+}
+
+for ( i = 0; i<MaxCats; i++)
+{
+delete CatHouse[i];
+TelepathicFunction();
+}
+return 0;
+}
+
+void TelepathicFunction()
+{
+cout << "There are " << Cat::GetHowMany() << " cats alive!\n";
+}
+
+程序运行输出：
+There are 1 cats alive!
+There are 2 cats alive!
+There are 3 cats alive!
+There are 4 cats alive!
+There are 5 cats alive!
+There are 4 cats alive!
+There are 3 cats alive!
+There are 2 cats alive!
+There are 1 cats alive!
+There are 0 cats alive!
+
+
+5-8 什么叫做友元函数？什么叫做友元类？
+
+
+解： 
+友元函数是使用friend关键字声明的函数，它可以访问相应类的保护成员和私有成员。友元类是使用friend关键字声明的类，它的所有成员函数都是相应类的友元函数。
+
+ 
+
+5-9 如果类A是类B的友元，类B是类C的友元，类D是类A的派生类，那么类B是类A的友元吗？类C是类A的友元吗？类D是类B的友元吗？
+
+
+解： 
+类B不是类A的友元，友元关系不具有交换性；
+类C不是类A的友元，友元关系不具有传递性；
+类D不是类B的友元，友元关系不能被继承。
+
+
+5-10 静态成员变量可以为私有的吗？声明一个私有的静态整型成员变量。
+
+
+解： 
+可以，例如：
+private:
+static int a;
+
+
+5-11 在一个文件中定义一个全局变量n，主函数main()，在另一个文件中定义函数fn1()，在main()中对n赋值，再调用fn1()，在fn1()中也对n赋值，显示n最后的值。
+
+
+解： 
+#include <iostream.h>
+#include "fn1.h"
+
+int n;
+
+void main()
+{
+n = 20;
+fn1();
+cout << "n的值为" <<n;
+}
+
+// fn1.h文件 
+extern int n; 
+
+void fn1()
+{
+n=30;
+}
+
+程序运行输出：
+n的值为30
+
+
+5-12 在函数fn1()中定义一个静态变量n，fn1()中对n的值加1，在主函数中，调用fn1()十次，显示n的值。
+
+
+解： 
+#include <iostream.h>
+
+void fn1()
+{
+static int n = 0;
+n++;
+cout << "n的值为" << n <<endl;
+}
+
+void main()
+{
+for(int i = 0; i < 10; i++)
+fn1();
+}
+
+程序运行输出：
+n的值为1
+n的值为2
+n的值为3
+n的值为4
+n的值为5
+n的值为6
+n的值为7
+n的值为8
+n的值为9
+n的值为10
+
+
+5-13 定义类X、Y、Z，函数h(X*)，满足：类X有私有成员i，Y的成员函数g(X*)是X的友元函数，实现对X的成员i加1，类Z是类X的友元类，其成员函数f(X*)实现对X的成员i加5，函数h(X*)是X的友元函数，实现对X的成员i加10。在一个文件中定义和实现类，在另一个文件中实现main()函数。
+
+
+解： 
+#include "my_x_y_z.h"
+void main() 
+{
+X x;
+Z z;
+z.f(&x);
+}
+
+// my_x_y_z.h文件
+#ifndef MY_X_Y_Z_H
+
+class X; 
+class Y {
+void g(X*);
+};
+
+class X 
+{ 
+private:
+int i;
+public:
+X(){i=0;}
+friend void h(X*);
+friend void Y::g(X*);
+friend class Z;
+};
+
+void h(X* x) { x->i =+10; }
+
+void Y::g(X* x) { x->i ++; }
+
+class Z {
+public:
+void f(X* x) { x->i += 5; }
+};
+
+#endif // MY_X_Y_Z_H
+
+程序运行输出：无
+
+
+5-14 定义Boat与Car两个类，二者都有weight属性，定义二者的一个友元函数totalWeight()，计算二者的重量和。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Boat;
+class Car
+{
+private:
+int weight;
+public:
+Car(int j){weight = j;}
+friend int totalWeight(Car &aCar， Boat &aBoat);
+};
+
+class Boat
+{
+private:
+int weight;
+public:
+Boat(int j){weight = j;}
+friend int totalWeight(Car &aCar， Boat &aBoat);
+};
+
+int totalWeight(Car &aCar， Boat &aBoat)
+{
+return aCar.weight + aBoat.weight;
+}
+
+void main()
+{
+Car c1(4);
+Boat b1(5);
+
+cout << totalWeight(c1， b1) << endl;
+}
+程序运行输出：
+9
+
+
+5-15 如果在类模板的定义中有一个静态数据成员，则在程序运行中会产生多少个相应的静态变量？
+
+
+解： 
+这个类模板的每一个实例类都会产生一个相应的静态变量。
+
+
+
+ 

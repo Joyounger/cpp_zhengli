@@ -1,0 +1,2301 @@
+第 七 章       继承与派生
+
+
+7-1 比较类的三种继承方式public公有继承、protected保护继承、private私有继承之间的差别。
+
+
+解： 
+不同的继承方式，导致不同访问属性的基类成员在派生类中的访问属性也有所不同：
+公有继承，使得基类public(公有)和protected(保护)成员的访问属性在派生类中不变，而基类private(私有)成员不可访问。
+私有继承，使得基类public(公有)和protected(保护)成员都以private(私有)成员身份出现在派生类中，而基类private(私有)成员不可访问。
+保护继承中，基类public(公有)和protected(保护)成员都以protected(保护)成员身份出现在派生类中，而基类private(私有)成员不可访问。 
+
+7-2 派生类构造函数执行的次序是怎样的？
+
+
+解： 
+派生类构造函数执行的一般次序为：调用基类构造函数；调用成员对象的构造函数；派生类的构造函数体中的内容。
+
+
+7-3 如果在派生类B已经重载了基类A的一个成员函数fn1()，没有重载成员函数fn2()，如何调用基类的成员函数fn1()、fn2()？
+
+
+解： 
+调用方法为： A::fn1(); 
+fn2();
+
+
+7-4 什么叫做虚基类？有何作用？
+
+
+解： 
+当某类的部分或全部直接基类是从另一个基类派生而来，这些直接基类中，从上一级基类继承来的成员就拥有相同的名称，派生类的对象的这些同名成员在内存中同时拥有多个拷贝，我们可以使用作用域分辨符来唯一标识并分别访问它们。我们也可以将直接基类的共同基类设置为虚基类，这时从不同的路径继承过来的该类成员在内存中只拥有一个拷贝，这样就解决了同名成员的唯一标识问题。
+虚基类的声明是在派生类的定义过程，其语法格式为：
+class 派生类名：virtual 继承方式 基类名
+上述语句声明基类为派生类的虚基类，在多继承情况下，虚基类关键字的作用范围和继承方式关键字相同，只对紧跟其后的基类起作用。声明了虚基类之后，虚基类的成员在进一步派生过程中，和派生类一起维护一个内存数据拷贝。
+
+
+7-5 定义一个Shape基类，在此基础上派生出Rectangle和Circle，二者都有GetArea()函数计算对象的面积。使用Rectangle类创建一个派生类Square。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Shape
+{
+public:
+Shape(){}
+~Shape(){}
+virtual float GetArea() { return -1; } 
+};
+
+class Circle : public Shape
+{
+public:
+Circle(float radius):itsRadius(radius){}
+~Circle(){}
+float GetArea() { return 3.14 * itsRadius * itsRadius; }
+private:
+float itsRadius;
+};
+
+class Rectangle : public Shape
+{
+public:
+Rectangle(float len， float width): itsLength(len)， itsWidth(width){};
+~Rectangle(){};
+virtual float GetArea() { return itsLength * itsWidth; }
+virtual float GetLength() { return itsLength; }
+virtual float GetWidth() { return itsWidth; }
+private:
+float itsWidth;
+float itsLength;
+};
+
+class Square : public Rectangle
+{
+public:
+Square(float len);
+~Square(){}
+};
+
+Square::Square(float len):
+Rectangle(len，len)
+{
+}
+
+void main()
+{
+Shape * sp;
+
+sp = new Circle(5);
+cout << "The area of the Circle is " << sp->GetArea () << endl;
+delete sp;
+sp = new Rectangle(4，6);
+cout << "The area of the Rectangle is " << sp->GetArea() << endl;
+delete sp;
+sp = new Square(5);
+cout << "The area of the Square is " << sp->GetArea() << endl;
+delete sp;
+}
+
+程序运行输出：
+The area of the Circle is 78.5
+The area of the Rectangle is 24
+The area of the Square is 25
+
+
+7-6 定义一个哺乳动物Mammal类，再由此派生出狗Dog类，定义一个Dog类的对象，观察基类与派生类的构造函数与析构函数的调用顺序。
+
+
+解： 
+源程序：
+#include <iostream.h>
+enum myColor{ BLACK， WHITE };
+class Mammal
+{
+public:
+// constructors
+Mammal();
+~Mammal();
+
+//accessors
+int GetAge() const { return itsAge; }
+void SetAge(int age) { itsAge = age; }
+int GetWeight() const { return itsWeight; }
+void SetWeight(int weight) { itsWeight = weight; }
+
+//Other methods
+void Speak() const { cout << "Mammal sound!\n"; }
+
+protected:
+int itsAge;
+int itsWeight;
+};
+
+class Dog : public Mammal
+{
+public:
+Dog();
+~Dog();
+
+myColor GetColor() const { return itsColor; }
+void SetColor (myColor color) { itsColor = color; }
+
+void WagTail() { cout << "Tail wagging...\n"; }
+
+private:
+myColor itsColor;
+};
+
+Mammal::Mammal():
+itsAge(1)，
+itsWeight(5)
+{
+cout << "Mammal constructor...\n";
+}
+
+Mammal::~Mammal()
+{
+cout << "Mammal destructor...\n";
+}
+
+Dog::Dog(): itsColor (WHITE)
+{
+cout << "Dog constructor...\n";
+}
+
+Dog::~Dog()
+{
+cout << "Dog destructor...\n";
+}
+int main()
+{
+Dog Jack;
+Jack.Speak();
+Jack.WagTail();
+cout << " Jack is " << Jack.GetAge() << " years old\n";
+
+return 0;
+}
+
+程序运行输出：
+Mammal constructor...
+Dog constructor...
+Mammal sound!
+Tail wagging...
+Fido is 1 years old
+Dog destructor...
+Mammal destructor...
+
+ 
+
+7-7 定义一个基类，构造其派生类，在构造函数中输出提示信息，观察构造函数的执行情况。
+
+
+解： 
+#include <iostream.h>
+
+class BaseClass
+{
+public:
+BaseClass();
+};
+
+BaseClass::BaseClass()
+{
+cout << "构造基类对象!" << endl;
+
+}
+
+class DerivedClass : public BaseClass
+{
+public:
+DerivedClass(); 
+};
+
+DerivedClass::DerivedClass()
+{
+cout << "构造派生类对象!" << endl;
+}
+
+
+void main()
+{
+DerivedClass d;
+}
+
+程序运行输出：
+构造基类对象!
+构造派生类对象!
+
+
+7-8 定义一个Document类，有name成员变量，从Document派生出Book类，增加PageCount变量。
+
+
+解： 
+#include <iostream.h>
+#include <string.h>
+
+class Document
+{
+public:
+Document(){};
+Document( char *name );
+char *Name; // Document name.
+void PrintNameOf(); // Print name.
+};
+Document::Document( char *name )
+{
+Name = new char[ strlen( name ) + 1 ];
+strcpy( Name, name );
+};
+
+void Document::PrintNameOf()
+{
+cout << Name << endl;
+}
+
+class Book : public Document
+{
+public:
+Book( char *name, long pagecount );
+void PrintNameOf();
+private:
+long PageCount;
+};
+Book::Book( char *name, long pagecount ):Document(name)
+{
+PageCount = pagecount;
+}
+void Book::PrintNameOf()
+{
+cout << "Name of book: ";
+Document::PrintNameOf();
+}
+
+
+void main()
+{
+Document a("Document1");
+Book b("Book1",100);
+b.PrintNameOf();
+}
+程序运行输出：
+Name of book: Book1
+
+
+7-9 定义基类Base，有两个共有成员函数fn1()、fn2()，私有派生出Derived类，如果想在Derived类的对象中使用基类函数fn1()，应怎么办？
+
+
+解： 
+class Base 
+{
+public:
+int fn1() const { return 1; }
+int fn2() const { return 2; }
+
+};
+
+class Derived : private Base 
+{ 
+public:
+int fn1() { return Base::fn1();}; 
+int fn2() { return Base::fn2();};
+};
+
+void main()
+{
+Derived a;
+a.fn1();
+}
+
+
+7-10 定义object类，有weight属性及相应的操作函数，由此派生出box类，增加Height和width属性及相应的操作函数，声明一个box对象，观察构造函数与析构函数的调用顺序。
+
+
+解： 
+#include <iostream.h>
+
+class object
+{
+private:
+int Weight;
+public:
+object()
+{ 
+cout << "构造object对象" << endl;
+Weight = 0;
+}
+int GetWeight(){ return Weight;} 
+void SetWeight(int n){ Weight = n;}
+~object() { cout << "析构object对象" << endl;}
+};
+
+class box : public object
+{
+private:
+int Height,Width;
+public:
+box()
+{ 
+cout << "构造box对象" << endl;
+Height = Width = 0;
+}
+int GetHeight(){ return Height;} 
+void SetHeight(int n){ Height = n;}
+int GetWidth(){ return Width;} 
+void SetWidth(int n){ Width = n;}
+~box() { cout << "析构box对象" << endl;}
+};
+
+void main()
+{
+box a;
+}
+
+程序运行输出：
+构造object对象
+构造box对象
+析构box对象
+析构object对象
+
+ 
+
+7-11 定义一个基类BaseClass，从它派生出类DerivedClass，BaseClass有成员函数fn1()、fn2()，DerivedClass也有成员函数fn1()、fn2()，在主程序中定义一个DerivedClass的对象，分别用DerivedClass的对象以及BaseClass和DerivedClass的指针来调用fn1()、fn2()，观察运行结果。
+
+
+解： 
+#include <iostream.h>
+
+class BaseClass
+{
+public:
+void fn1();
+void fn2();
+};
+void BaseClass::fn1()
+{
+cout << "调用基类的函数fn1()" << endl;
+}
+void BaseClass::fn2()
+{
+cout << "调用基类的函数fn2()" << endl;
+}
+
+
+class DerivedClass : public BaseClass
+{
+public:
+void fn1();
+void fn2();
+};
+void DerivedClass::fn1()
+{
+cout << "调用派生类的函数fn1()" << endl;
+}
+
+void DerivedClass::fn2()
+{
+cout << "调用派生类的函数fn2()" << endl;
+}
+
+void main()
+{
+DerivedClass aDerivedClass;
+DerivedClass *pDerivedClass = &aDerivedClass;
+BaseClass *pBaseClass = &aDerivedClass;
+
+aDerivedClass.fn1();
+aDerivedClass.fn2();
+pBaseClass->fn1();
+pBaseClass->fn2();
+pDerivedClass->fn1();
+pDerivedClass->fn2();
+}
+程序运行输出：
+调用派生类的函数fn1()
+调用派生类的函数fn2()
+调用基类的函数fn1()
+调用基类的函数fn2()
+调用派生类的函数fn1()
+调用派生类的函数fn2()
+
+
+7-12 为例9-1的吹泡泡程序加一版权（About）对话框。
+然后修改例9-1的程序，加入以下内容：
+
+
+程 序：
+1．在程序首部加上文件包含命令
+#include “resource.h”
+2．在框架窗口类之前加入从CDialog类派生的对话框类：
+// 对话框类
+class CAboutDlg: public CDialog
+{
+public:
+CAboutDlg();
+enum {IDD = IDD_DIALOG1};
+};
+inline CAboutDlg::CAboutDlg():CDialog(CAboutDlg::IDD){}
+3．在框架窗口类中添加响应鼠标右键消息的代码，包括消息响应函数说明、消息响应宏和消息响应函数定义。鼠标右键消息响应函数为：
+void CMyWnd::OnRButtonDown(UINT nFlags, CPoint point)
+{
+CAboutDlg dlg;
+dlg.DoModal();
+}
+
+7-13 签名留念簿程序。该程序模仿签名簿，用户使用鼠标左键点击窗口客户区后会弹出一个对话框，输入姓名后可在鼠标点击位置显示出该签名。签名的颜色、字体大小和方向随机确定。
+说 明：项目建立及添加对话框模板资源的方法同例14-1。修改对话框模板的ID为IDD_NAMEDLG，Caption为“签名对话框”，并添加一个静态文本控件（Caption改为“签名”）和一个编辑控件（ID改为IDC_EDITNAME）。
+
+
+程 序：
+// Example 14-2：签名留念簿程序
+#include <afxwin.h>
+#include "resource.h"
+// 对话框类
+class CNameDlg: public CDialog
+{
+public:
+CPoint m_pointTopLeft;
+CString m_strNameEdit;
+public:
+CNameDlg();
+enum {IDD = IDD_NAMEDLG};
+protected:
+virtual void DoDataExchange(CDataExchange* pDX);
+virtual BOOL OnInitDialog(); 
+};
+// 对话框类的构造函数
+CNameDlg::CNameDlg():CDialog(CNameDlg::IDD)
+{
+m_strNameEdit = _T("");
+}
+// 数据交换和数据检验
+void CNameDlg::DoDataExchange(CDataExchange* pDX)
+{
+CDialog::DoDataExchange(pDX);
+DDX_Text(pDX, IDC_EDITNAME, m_strNameEdit);
+DDV_MaxChars(pDX, m_strNameEdit, 20);
+}
+// 初始化对话框
+BOOL CNameDlg::OnInitDialog() 
+{
+CDialog::OnInitDialog();
+CRect rect;
+GetWindowRect(&rect);
+rect = CRect(m_pointTopLeft, rect.Size());
+MoveWindow(rect);
+return TRUE;
+}
+// 签名类
+class CSignal: public CObject
+{
+CString m_sName; // 姓名
+CPoint m_pointSignal; // 签名位置
+int m_nHeight; // 字体高
+int m_nColor; // 签名颜色
+int m_nEscapement; // 签名倾角
+public:
+CSignal(){}
+void SetValue(CString name,CPoint point,int height,int color,
+int escapement);
+void ShowSignal(CDC *pDC);
+};
+// 签名类成员函数
+void CSignal::SetValue(CString name,CPoint point,int height,int color, 
+int escapement)
+{
+m_sName = name;
+m_pointSignal = point;
+m_nHeight = height;
+m_nColor = color;
+m_nEscapement = escapement;
+}
+// 显示签名
+void CSignal::ShowSignal(CDC *pDC)
+{
+CFont *pOldFont, font;
+font.CreateFont(m_nHeight, 0, m_nEscapement,0, 400, FALSE,FALSE,
+0, OEM_CHARSET, OUT_DEFAULT_PRECIS, 
+CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY, 
+DEFAULT_PITCH, "楷体");
+pOldFont = pDC->SelectObject(&font);
+switch(m_nColor)
+{
+case 0:
+pDC->SetTextColor(RGB(0, 0, 0));
+break;
+case 1:
+pDC->SetTextColor(RGB(255, 0, 0));
+break;
+case 2:
+pDC->SetTextColor(RGB(0, 255, 0));
+break;
+case 3:
+pDC->SetTextColor(RGB(0, 0, 255));
+break;
+}
+pDC->TextOut(m_pointSignal.x, m_pointSignal.y, m_sName);
+pDC->SelectObject(pOldFont);
+}
+// 框架窗口类
+#define MAX_NAME 250
+class CMyWnd: public CFrameWnd
+{
+CSignal m_signalList[MAX_NAME];
+int m_nCount;
+public:
+CMyWnd(): m_nCount(0){}
+protected:
+afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnPaint();
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CMyWnd, CFrameWnd)
+ON_WM_LBUTTONDOWN()
+ON_WM_PAINT()
+END_MESSAGE_MAP()
+// 框架窗口类的成员函数
+// 鼠标右键消息响应函数
+void CMyWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+if(m_nCount < MAX_NAME)
+{
+CNameDlg dlg;
+dlg.m_pointTopLeft = point;
+if(dlg.DoModal() == IDOK)
+{
+int height = rand()%60+12;
+int color = rand()%4;
+int escapement = (rand()%1200)-600;
+CString name = dlg.m_strNameEdit;
+m_signalList[m_nCount].SetValue(name,point,height,
+color,escapement);
+m_nCount++;
+Invalidate();
+}
+}
+}
+// 绘制框架窗口客户区函数
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+for(int i=0; i<m_nCount; i++)
+m_signalList[i].ShowSignal(&dc);
+}
+// 应用程序类
+class CMyApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 应用程序类的成员函数
+BOOL CMyApp::InitInstance()
+{
+CMyWnd *pFrame = new CMyWnd;
+pFrame->Create(0,_T("签字留念簿程序"));
+pFrame->ShowWindow(m_nCmdShow);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 全局应用程序对象
+CMyApp ThisApp;
+
+ 
+
+7-14 将例14-2的签名留念簿中的对话框改为无模式对话框。用户可用鼠标右键调出签名对话框，并在不退出该对话框的情况下用鼠标左键将输入的签名显示在窗口客户区。
+说 明：在向项目中添加对话框模板资源时，要在其属性对话框的More Styles页中选择Visible项。其他同例14-2。
+
+
+程 序：
+
+该程序中的签名类CSignal和应用程序类与上例相同，因此下面仅列出了框架窗口类和对话框类。由于这两个类的成员函数中存在相互引用的情况，所以我们将框架窗口类的声明放在前面，接下来是对话框类的定义，并在框架窗口类之前加入了一条对对话框类的声明。最后是这两个类的成员函数定义。
+// 框架窗口类
+#define MAX_NAME 250
+class CNameDlg;
+class CMyWnd: public CFrameWnd
+{
+CSignal m_signalList[MAX_NAME];
+int m_nCount;
+CNameDlg *m_pNameDlg;
+public:
+CMyWnd();
+~CMyWnd();
+protected:
+afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnPaint();
+DECLARE_MESSAGE_MAP()
+};
+// 对话框类
+class CNameDlg: public CDialog
+{
+public:
+BOOL m_bActive;
+CString m_strNameEdit;
+enum {IDD = IDD_NAMEDLG};
+CNameDlg();
+BOOL Create();
+protected:
+virtual void DoDataExchange(CDataExchange* pDX);
+virtual BOOL OnInitDialog();
+virtual void OnOK();
+virtual void OnCancel();
+};
+// 框架窗口类的消息映射
+BEGIN_MESSAGE_MAP(CMyWnd, CFrameWnd)
+ON_WM_LBUTTONDOWN()
+ON_WM_RBUTTONDOWN()
+ON_WM_PAINT()
+END_MESSAGE_MAP()
+// 框架窗口类的成员函数
+// 框架窗口类的构造函数
+CMyWnd::CMyWnd()
+{
+m_nCount = 0;
+m_pNameDlg = new CNameDlg;
+}
+// 框架窗口类的析构函数
+CMyWnd::~CMyWnd()
+{
+delete m_pNameDlg;
+}
+// 鼠标右键消息响应函数
+void CMyWnd::OnRButtonDown(UINT nFlags, CPoint point)
+{
+if(m_pNameDlg->m_bActive)
+m_pNameDlg->SetActiveWindow(); // 激活对话框
+else
+m_pNameDlg->Create(); // 显示对话框
+}
+// 鼠标左键消息响应函数
+void CMyWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+if(m_nCount < MAX_NAME)
+{
+int height = rand()%60+12;
+int color = rand()%4;
+int escapement = (rand()%1200)-600;
+CString name = m_pNameDlg->m_strNameEdit;
+m_signalList[m_nCount].SetValue(name, point, height, color,
+escapement);
+m_nCount++;
+Invalidate();
+}
+}
+// 绘制框架窗口客户区函数
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+for(int i=0; i<m_nCount; i++)
+m_signalList[i].ShowSignal(&dc);
+}
+// 对话框类的成员函数
+// 对话框类的构造函数
+CNameDlg::CNameDlg():CDialog(CNameDlg::IDD)
+{
+m_bActive = FALSE;
+m_strNameEdit = _T("");
+}
+// 数据交换
+void CNameDlg::DoDataExchange(CDataExchange* pDX)
+{
+CDialog::DoDataExchange(pDX);
+DDX_Text(pDX, IDC_EDIT1, m_strNameEdit);
+}
+// 初始化对话框
+BOOL CNameDlg::OnInitDialog() 
+{
+CDialog::OnInitDialog();
+CRect rect;
+GetWindowRect(&rect);
+MoveWindow(0, 0, rect.Width(), rect.Height());
+return TRUE;
+}
+// 显示无模态对话框
+BOOL CNameDlg::Create()
+{
+m_bActive = TRUE;
+return CDialog::Create(CNameDlg::IDD);
+}
+// 退出对话框
+void CNameDlg::OnCancel() 
+{
+m_bActive = FALSE;
+DestroyWindow(); 
+}
+// 更新数据
+void CNameDlg::OnOK()
+{
+UpdateData(TRUE);
+}
+
+ 
+
+7-15 为例14-2的签名程序加上字体选择对话框。
+说 明：本程序使用字体选择公用对话框（通过鼠标右键调出）选择签名的字体、字号和颜色等参数，在签名对话框中要输入姓名和签名与X轴的倾斜角。建立项目的方法与例14-2相似，只是要在签名对话框模板中再添加一个编辑控件用于输入签名的倾斜角，其标识符为IDD_EDIT2。
+
+
+程 序：
+// Example 14-4：签名留念簿程序
+#include <afxwin.h>
+#include <afxdlgs.h>
+#include <string.h>
+#include "resource.h"
+// 对话框类
+class CNameDlg: public CDialog
+{
+public:
+CPoint m_pointTopLeft; // 对话框位置
+CString m_strNameEdit; // 签名
+LONG m_lEscapement; // 签名倾角
+public:
+CNameDlg();
+enum {IDD = IDD_NAMEDLG};
+protected:
+virtual void DoDataExchange(CDataExchange* pDX);
+virtual BOOL OnInitDialog(); 
+};
+// 对话框类的构造函数
+CNameDlg::CNameDlg():CDialog(CNameDlg::IDD), m_pointTopLeft(0, 0)
+{
+m_strNameEdit = _T("");
+m_lEscapement = 0;
+}
+// 数据交换和数据检验
+void CNameDlg::DoDataExchange(CDataExchange* pDX)
+{
+CDialog::DoDataExchange(pDX);
+DDX_Text(pDX, IDC_EDIT1, m_strNameEdit);
+DDX_Text(pDX, IDC_EDIT2, m_lEscapement);
+DDV_MaxChars(pDX, m_strNameEdit, 20);
+DDV_MinMaxLong(pDX, m_lEscapement, -600, 600);
+}
+// 初始化对话框
+BOOL CNameDlg::OnInitDialog() 
+{
+CDialog::OnInitDialog();
+CRect rect;
+GetWindowRect(&rect);
+rect = CRect(m_pointTopLeft, rect.Size());
+MoveWindow(rect);
+return TRUE;
+}
+// 签名类
+class CSignal: public CObject
+{
+CString m_strSignal; // 姓名
+COLORREF m_colorSignal; // 签名颜色
+CPoint m_pointSignal; // 签名位置
+LOGFONT m_fontSignal; // 签名字体
+public:
+CSignal(){}
+void SetValue(CString signal, CPoint point, COLORREF color,
+LONG escapement, LOGFONT *pfont);
+void ShowSignal(CDC *pDC);
+};
+// 签名类成员函数
+void CSignal::SetValue(CString signal, CPoint point, COLORREF color,
+int escapement, LOGFONT *pfont)
+{
+m_strSignal = signal;
+m_pointSignal = point;
+m_colorSignal = color;
+memcpy(&m_fontSignal, pfont, sizeof(LOGFONT));
+m_fontSignal.lfEscapement = escapement;
+}
+// 显示签名
+void CSignal::ShowSignal(CDC *pDC)
+{
+CFont font, *pOldFont;
+font.CreateFontIndirect(&m_fontSignal);
+pOldFont = pDC->SelectObject(&font);
+pDC->SetTextColor(m_colorSignal);
+pDC->TextOut(m_pointSignal.x, m_pointSignal.y, m_strSignal);
+pDC->SelectObject(pOldFont);
+}
+// 框架窗口类
+#define MAX_NAME 250
+class CMyWnd: public CFrameWnd
+{
+CSignal m_signalList[MAX_NAME]; // 签名数组
+int m_nCount; // 签名数量
+LOGFONT m_fontSignal; // 签名字体
+COLORREF m_colorSignal; // 签名颜色
+public:
+CMyWnd();
+protected:
+afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnPaint();
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CMyWnd, CFrameWnd)
+ON_WM_LBUTTONDOWN()
+ON_WM_RBUTTONDOWN()
+ON_WM_PAINT()
+END_MESSAGE_MAP()
+// 框架窗口类的成员函数
+CMyWnd::CMyWnd()
+{
+m_nCount = 0;
+m_colorSignal = RGB(0, 0, 0);
+m_fontSignal.lfHeight = 40; 
+m_fontSignal.lfWidth = 0; 
+m_fontSignal.lfEscapement = 0; 
+m_fontSignal.lfOrientation = 0; 
+m_fontSignal.lfWeight = 400; 
+m_fontSignal.lfItalic = FALSE; 
+m_fontSignal.lfUnderline = FALSE; 
+m_fontSignal.lfStrikeOut = 0; 
+m_fontSignal.lfCharSet = OEM_CHARSET; 
+m_fontSignal.lfOutPrecision = OUT_DEFAULT_PRECIS; 
+m_fontSignal.lfClipPrecision = CLIP_DEFAULT_PRECIS; 
+m_fontSignal.lfQuality = DEFAULT_QUALITY; 
+m_fontSignal.lfPitchAndFamily = DEFAULT_PITCH; 
+strcpy(m_fontSignal.lfFaceName, "Arial"); 
+}
+// 鼠标右键消息响应函数
+void CMyWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+if(m_nCount < MAX_NAME)
+{
+CNameDlg dlg;
+dlg.m_pointTopLeft = point;
+if(dlg.DoModal() == IDOK)
+{
+LONG escapement = dlg.m_lEscapement;
+CString name = dlg.m_strNameEdit;
+m_signalList[m_nCount].SetValue(name, point, m_colorSignal,
+escapement, &m_fontSignal);
+m_nCount++;
+Invalidate();
+}
+}
+}
+// 鼠标右键消息响应函数
+void CMyWnd::OnRButtonDown(UINT nFlags, CPoint point)
+{
+CFontDialog dlg(&m_fontSignal);
+if(dlg.DoModal() == IDOK)
+{
+dlg.GetCurrentFont(&m_fontSignal);
+m_colorSignal = dlg.GetColor();
+}
+}
+// 绘制框架窗口客户区函数
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+for(int i=0; i<m_nCount; i++)
+m_signalList[i].ShowSignal(&dc);
+}
+// 应用程序类
+class CMyApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 应用程序类的成员函数
+BOOL CMyApp::InitInstance()
+{
+CMyWnd *pFrame = new CMyWnd;
+pFrame->Create(0,_T("签字留念簿程序"));
+pFrame->ShowWindow(SW_SHOWMAXIMIZED);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 全局应用程序对象
+CMyApp ThisApp;
+
+ 
+
+7-16 为例9-3的吹泡泡程序添加颜色选择对话框，使其可以绘出五颜六色的泡泡。
+
+
+程 序：在例9-3的程序基础上作如下修改：
+1．在程序首部添加文件包含命令：
+#include <afxdlgs.h>
+2．在框架窗口类声明中添加一个COLORREF类型的数组，存放各泡泡的颜色：
+COLORREF m_colorBubble [MAX_BUBBLE];
+3．修改鼠标左键消息映射函数，添加使用颜色选择公用对话框的代码：
+void CMyWnd::OnLButtonDown ( UINT nFlags, CPoint point )
+{
+if(m_nBubbleCount < MAX_BUBBLE)
+{
+m_colorBubble[m_nBubbleCount] = RGB(200, 200, 200);
+CColorDialog dlg(m_colorBubble[m_nBubbleCount]);
+if(dlg.DoModal() == IDOK)
+m_colorBubble[m_nBubbleCount] = dlg.GetColor();
+int r = rand()%50+10;
+CRect rect(point.x-r, point.y-r, point.x+r, point.y+r);
+m_rectBubble[m_nBubbleCount] = rect;
+m_nBubbleCount++;
+InvalidateRect(rect, FALSE);
+}
+}
+4．修改OnPaint（）成员函数，添加根据泡泡颜色使用画刷的代码：
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+CBrush brushNew, *pbrushOld;
+for(int i=0; i<m_nBubbleCount; i++)
+{
+brushNew.CreateSolidBrush(m_colorBubble[i]);
+pbrushOld = dc.SelectObject(&brushNew);
+dc.Ellipse(m_rectBubble[i]);
+dc.SelectObject(pbrushOld);
+brushNew.DeleteObject();
+}
+}
+
+
+
+7-17 序列化。如果例12-1的吹泡泡程序使用一般的数组存放泡泡数据（参看例9-1的程序）：
+CRect m_rectBubble[MAX_BUBBLE];
+int m_nBubbleCount;
+为其文档类重新设计Serialize（）函数。
+说 明：按例12-1的方法建立项目和输入源代码，但将文档类中的泡泡数据改为以上两行的形式。修改文档类的Serialize（）函数，代码如下。
+
+
+程 序：
+// 序列化函数
+void CMyDoc::Serialze(CArchive& ar)
+{
+if(ar.IsStoring())
+{
+ar << m_nBubbleCount;
+for(int i=0; i<m_nBubbleCount; i++)
+ar << m_rectBubble[i];
+}
+else
+{
+ar >> m_nBubbleCount;
+for(int i=0; i<m_nBubbleCount; i++)
+ar >> m_rectBubble[i];
+}
+}
+
+
+7-18 修改例12-1的程序并观察其打印结果。
+
+
+程 序：
+
+在例12-1程序的视图类CMyView类的成员函数OnDraw（）中，添加代码沿窗口客户区轮廓画一矩形：
+void CMyView::OnDraw(CDC* pDC)
+{
+CRect rect;
+GetClientRect(&rect);
+pDC->Rectangle(rect);
+
+CMyDoc* pDoc = GetDocument(); // 取文档指针
+ASSERT_VALID(pDoc);
+pDC->SelectStockObject(LTGRAY_BRUSH); // 在视图上显示文档数据
+for(int i=0; i<pDoc->GetListSize(); i++)
+pDC->Ellipse(pDoc->GetBubble(i));
+}
+
+
+7-19 改进吹泡泡程序，使之打印输出与屏幕显示的比例相近。
+
+
+程 序：
+
+在例12-1基础上修改。首先在CMyView类中重载虚函数OnPrepareDC（）。在CMyView类的声明中增加一行：
+virtual void OnPrepareDC(CDC *pDC, CPrintInfo *pInfo=NULL);
+然后添加该函数的定义，设置映射模式为MM_LOMETRIC：
+// 设置映射模式
+void CMyView::OnPrepareDC(CDC *pDC, CPrintInfo *pInfo)
+{
+pDC->SetMapMode(MM_LOMETRIC);
+CView::OnPrepareDC(pDC, pInfo);
+}
+然后修改消息映射函数OnLButtonDown（）,将物理坐标转换为逻辑坐标：
+// 响应点击鼠标左键消息
+void CMyView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+CMyDoc* pDoc = GetDocument(); // 取文档指针
+ASSERT_VALID(pDoc);
+CClientDC dc(this); // 设置设备环境
+OnPrepareDC(&dc);
+int r = rand()%50+5; // 生成泡泡
+CRect rect(point.x-r, point.y-r, point.x+r, point.y+r);
+InvalidateRect(rect, FALSE); // 更新视图
+dc.DPtoLP(rect); // 转换物理坐标为逻辑坐标
+pDoc->AddBubble(rect); // 修改文档数据
+pDoc->SetModifiedFlag(); // 设置修改标志
+}
+
+
+7-20 声明一个Person类，并使之支持序列化。
+
+
+程 序：
+class CPerson: public CObject
+{
+DECLARE_SERIAL( CPerson)
+LONG m_IDnumber; // 身份证号码
+CString m_strName; // 姓名
+CString m_strNation; // 民族
+int m_nSex; // 性别
+int m_nAge; // 年龄
+BOOL m_bMarried; // 婚否
+public:
+CEmployee(){};
+CPerson& operator = (CPerson& person);
+void Serialize(CArchive& ar);
+};
+IMPLEMENT_SERIAL( CPerson, CObject, 1 )
+CPerson& CPerson::operator = (CPerson& person)
+{
+m_IDnumber = person.m_IDnumber;
+m_strName = person.m_strName;
+m_strNation = person.m_strNation;
+m_nSex = person.m_nSex;
+m_nAge = person.m_nAge;
+m_bMarried = person.m_bMarried;
+return *this;
+}
+void CPerson::Serialize(CArchive& ar)
+{
+CObject::Serialize( ar); // 首先调用基类的Serialize()方法
+if(ar.IsStoring())
+{
+ar << m_IDnumber;
+ar << m_strName;
+ar << m_strNation;
+ar << m_nSex;
+ar << m_nAge;
+ar << (int)m_bMarried;
+}
+else
+{
+ar >> m_IDnumber;
+ar >> m_strName;
+ar >> m_strNation;
+ar >> m_nSex;
+ar >> m_nAge;
+ar >> (int)m_bMarried;
+}
+}
+
+7-21 修改例13-3的吹泡泡程序，使其打印每个泡泡的数据值。打印格式为每页40行，页眉为文档名，页脚为页号。
+说 明：首先为视图类添加一个数据成员m_nLinePerPage，用来存放每页行数，并在视图类CMyView的构造函数中将m_nLinePerPage初始化为40。
+修改视图类成员函数OnPrepareDC（），设置映射模式为MM_TWIPS。该模式为每英寸1440点，很适合打印机输出。
+
+
+程 序：
+
+重载视图类的成员函数OnPreparePrinting（），在其中添加计算打印页数的代码：
+BOOL CMyView::OnPreparePrinting(CPrintInfo* pInfo)
+{
+CMyDoc *pDoc = GetDocument();
+int nPageCount = pDoc->GetListSize()/m_nLinePerPage;
+if(pDoc->GetListSize() % m_nLinePerPage)
+nPageCount ++;
+pInfo->SetMaxPage(nPageCount);
+return DoPreparePrinting(pInfo);
+}
+最后重载视图类的OnPrint（）函数并添加打印代码：
+void CMyView::OnPrint( CDC* pDC, CPrintInfo* pInfo )
+{
+int nPage = pInfo->m_nCurPage; // 当前页号
+int nStart = (nPage-1)*m_nLinePerPage; // 本页第一行
+int nEnd = nStart+m_nLinePerPage; // 本页最后一行
+CFont font; // 设置字体
+font.CreateFont(-280, 0, 0, 0, 400, FALSE, FALSE, 
+0, ANSI_CHARSET, OUT_DEFAULT_PRECIS,
+CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY,
+DEFAULT_PITCH|FF_MODERN, "Courier New");
+CFont *pOldFont = (CFont *)(pDC->SelectObject(&font));
+CRect rectPaper = pInfo->m_rectDraw; // 取页面打印矩形
+// 页眉: 页面顶端中央打印文档名称
+CMyDoc *pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+CString str;
+str.Format("Bubble Report: %s", (LPCSTR)pDoc->GetTitle());
+CSize sizeText = pDC->GetTextExtent(str);
+CPoint point((rectPaper.Width()-sizeText.cx)/2, 0);
+pDC->TextOut(point.x, point.y, str);
+point.x = rectPaper.left; // 打印页眉下划线
+point.y = rectPaper.top-sizeText.cy;
+pDC->MoveTo(point);
+point.x = rectPaper.right;
+pDC->LineTo(point);
+// 打印表头
+str.Format("%6.6s %6.6s %6.6s %6.6s %6.6s", 
+"Index", "Left", "Top", "Right", "Bottom");
+point.x = 720;
+point.y -= 720;
+pDC->TextOut(point.x, point.y, str);
+TEXTMETRIC tm; // 取当前字体有关信息
+pDC->GetTextMetrics(&tm);
+int nHeight = tm.tmHeight+tm.tmExternalLeading;
+point.y -= 360; // 下移 1/4 英寸
+for(int i=nStart; i<nEnd; i++) // 打印表体
+{
+if(i >= pDoc->GetListSize())
+break;
+str.Format("%6d %6d %6d %6d %6d", i+1,
+pDoc->GetBubble(i).left,
+pDoc->GetBubble(i).top,
+pDoc->GetBubble(i).right,
+pDoc->GetBubble(i).bottom);
+point.y -= nHeight;
+pDC->TextOut(point.x, point.y, str);
+}
+// 在页面底部中央打印页号
+str.Format("- %d -", nPage);
+sizeText = pDC->GetTextExtent(str);
+point.x = (rectPaper.Width()-sizeText.cx)/2;
+point.y = rectPaper.Height()+sizeText.cy;
+pDC->TextOut(point.x, point.y, str);
+// 释放字体对象
+pDC->SelectObject(pOldFont);
+}
+
+ 
+
+7-22 修改例11-4的拼图程序，使之在难度菜单的相应选项前打钩。
+
+
+程 序：
+
+首先在框架窗口类的消息响应函数声明处增加以下消息响应函数的声明：
+afx_msg void CPuzzleWnd::OnUpdateGrad01(CCmdUI* pCmdUI);
+afx_msg void CPuzzleWnd::OnUpdateGrad02(CCmdUI* pCmdUI);
+afx_msg void CPuzzleWnd::OnUpdateGrad03(CCmdUI* pCmdUI);
+然后在框架窗口类的消息映射宏中加入相应内容：
+BEGIN_MESSAGE_MAP(CPuzzleWnd, CFrameWnd)
+ON_WM_LBUTTONDOWN()
+ON_WM_LBUTTONUP()
+ON_WM_MOUSEMOVE()
+ON_WM_PAINT()
+ON_COMMAND(ID_SHOWFIG, OnShowFig)
+ON_COMMAND(ID_GRAD01, OnGrad01)
+ON_COMMAND(ID_GRAD02, OnGrad02)
+ON_COMMAND(ID_GRAD03, OnGrad03)
+ON_UPDATE_COMMAND_UI(ID_GRAD01, OnUpdateGrad01)
+ON_UPDATE_COMMAND_UI(ID_GRAD02, OnUpdateGrad02)
+ON_UPDATE_COMMAND_UI(ID_GRAD03, OnUpdateGrad03)
+END_MESSAGE_MAP()
+注意更新命令用户接口消息映射宏将菜单标识符与相应的消息映射函数联系在一起。最后编写相应的更新命令用户接口消息映射函数：
+void CPuzzleWnd::OnUpdateGrad01(CCmdUI* pCmdUI) 
+{
+pCmdUI->SetCheck(m_nColCount == 4);
+}
+void CPuzzleWnd::OnUpdateGrad02(CCmdUI* pCmdUI) 
+{
+pCmdUI->SetCheck(m_nColCount == 8);
+}
+void CPuzzleWnd::OnUpdateGrad03(CCmdUI* pCmdUI) 
+{
+pCmdUI->SetCheck(m_nColCount == 16);
+}
+输入输出：在选择拼图难度时，可在相应选项前打钩（图13-4）。
+
+
+// Example 13-7: 七巧板程序 //////////////////////////////////
+#include <afxwin.h>
+#include <afxext.h>
+// 拼板类 ////////////////////////////////////////////////////
+#define MAX_POINTS 4
+#define CHIP_WIDTH 240
+#define DELTA 30
+class CChip : public CObject
+{
+DECLARE_SERIAL(CChip)
+int m_nType;
+CPoint m_pointList[MAX_POINTS];
+int m_nPointCount;
+public:
+CChip(){}
+void SetChip(int type, POINT *ppointlist, int count);
+void DrawChip(CDC *pDC);
+BOOL PtInChip(POINT point);
+LPCRECT GetRect();
+void MoveTo(CSize offset);
+void Rotation();
+void Serialize(CArchive &ar);
+};
+IMPLEMENT_SERIAL(CChip, CObject, 1)
+// 设置拼图块参数
+void CChip::SetChip(int type, POINT *ppointlist, int count)
+{
+m_nType = type;
+m_nPointCount = count;
+for(int i=0; i<count; i++)
+m_pointList[i] = ppointlist[i];
+}
+// 绘出拼图块
+void CChip::DrawChip(CDC *pDC)
+{
+CPen penNew, *ppenOld;
+CBrush brushNew, *pbrushOld;
+switch(m_nType)
+{
+case 1: 
+brushNew.CreateSolidBrush(RGB(127, 127, 127));
+break;
+case 2: 
+brushNew.CreateSolidBrush(RGB(255, 0, 0));
+break;
+case 3: 
+brushNew.CreateSolidBrush(RGB(0, 255, 0));
+break;
+case 4: 
+brushNew.CreateSolidBrush(RGB(0, 0, 255));
+break;
+case 5: 
+brushNew.CreateSolidBrush(RGB(127, 127, 0));
+break;
+case 6: 
+brushNew.CreateSolidBrush(RGB(127, 0, 127));
+break;
+case 7: 
+brushNew.CreateSolidBrush(RGB(0, 127, 127));
+break;
+}
+penNew.CreatePen(PS_SOLID, 1, RGB(0, 0, 0));
+ppenOld = pDC->SelectObject(&penNew);
+pbrushOld = pDC->SelectObject(&brushNew);
+pDC->Polygon(m_pointList, m_nPointCount);
+pDC->SelectObject(ppenOld);
+pDC->SelectObject(pbrushOld);
+}
+// 检测一点是否在拼图块中
+BOOL CChip::PtInChip(POINT point)
+{
+CRgn rgn;
+rgn.CreatePolygonRgn(m_pointList, m_nPointCount, 0);
+return rgn.PtInRegion(point);
+}
+// 取拼图块的包含矩形
+LPCRECT CChip::GetRect()
+{
+static RECT rect;
+CRgn rgn;
+rgn.CreatePolygonRgn(m_pointList, m_nPointCount, 0);
+rgn.GetRgnBox(&rect);
+rect.right++;
+rect.bottom++;
+return &rect;
+}
+// 旋转拼图块
+void CChip::Rotation()
+{
+CRect rect;
+CRgn rgn;
+rgn.CreatePolygonRgn(m_pointList, m_nPointCount, 0);
+rgn.GetRgnBox(&rect);
+double x = rect.left+rect.Width()/2; // 计算旋转中心
+double y = rect.top+rect.Height()/2;
+double dx, dy;
+for(int i=0; i<m_nPointCount; i++) // 旋转各点
+{
+dx = m_pointList[i].x-x;
+dy = m_pointList[i].y-y;
+m_pointList[i].x = (int)(x+dx*0.7071-dy*0.7071);
+m_pointList[i].y = (int)(y+dx*0.7071+dy*0.7071);
+}
+}
+// 移动拼图块
+void CChip::MoveTo(CSize offset)
+{
+for(int i=0; i<m_nPointCount; i++)
+m_pointList[i] = m_pointList[i]+offset;
+}
+// 序列化
+void CChip::Serialize(CArchive &ar)
+{
+if(ar.IsStoring())
+{
+ar << m_nType;
+ar << m_nPointCount;
+for(int i=0; i<m_nPointCount; i++)
+ar << m_pointList[i];
+}
+else
+{
+ar >> m_nType;
+ar >> m_nPointCount;
+for(int i=0; i<m_nPointCount; i++)
+ar >> m_pointList[i];
+}
+}
+// 文档类 ////////////////////////////////////////////////////
+#define CHIP_COUNT 7
+class CMyDoc : public CDocument
+{
+DECLARE_DYNCREATE(CMyDoc)
+CChip m_chipList[CHIP_COUNT];
+public:
+void Reset();
+virtual void DeleteContents();
+virtual void Serialize(CArchive& ar);
+};
+IMPLEMENT_DYNCREATE(CMyDoc, CDocument)
+// 初始化拼图块
+void CMyDoc::Reset()
+{
+POINT pointList[MAX_POINTS];
+pointList[0].x = DELTA;
+pointList[0].y = DELTA;
+pointList[1].x = DELTA+CHIP_WIDTH;
+pointList[1].y = DELTA;
+pointList[2].x = DELTA+CHIP_WIDTH/2;
+pointList[2].y = DELTA+CHIP_WIDTH/2;
+m_chipList[0].SetChip(1, pointList, 3);
+
+pointList[0].x = DELTA;
+pointList[0].y = DELTA;
+pointList[1].x = DELTA;
+pointList[1].y = DELTA+CHIP_WIDTH;
+pointList[2].x = DELTA+CHIP_WIDTH/2;
+pointList[2].y = DELTA+CHIP_WIDTH/2;
+m_chipList[1].SetChip(2, pointList, 3);
+
+pointList[0].x = DELTA+CHIP_WIDTH;
+pointList[0].y = DELTA;
+pointList[1].x = DELTA+CHIP_WIDTH;
+pointList[1].y = DELTA+CHIP_WIDTH/2;
+pointList[2].x = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].y = DELTA+CHIP_WIDTH/4;
+m_chipList[2].SetChip(3, pointList, 3);
+
+pointList[0].x = DELTA+CHIP_WIDTH/2;
+pointList[0].y = DELTA+CHIP_WIDTH/2;
+pointList[1].x = DELTA+CHIP_WIDTH/4;
+pointList[1].y = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].x = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].y = DELTA+(CHIP_WIDTH*3)/4;
+m_chipList[3].SetChip(4, pointList, 3);
+
+pointList[0].x = DELTA+CHIP_WIDTH;
+pointList[0].y = DELTA+CHIP_WIDTH/2;
+pointList[1].x = DELTA+CHIP_WIDTH;
+pointList[1].y = DELTA+CHIP_WIDTH;
+pointList[2].x = DELTA+CHIP_WIDTH/2;
+pointList[2].y = DELTA+CHIP_WIDTH;
+m_chipList[4].SetChip(5, pointList, 3);
+
+pointList[0].x = DELTA+(CHIP_WIDTH*3)/4;
+pointList[0].y = DELTA+CHIP_WIDTH/4;
+pointList[1].x = DELTA+CHIP_WIDTH/2;
+pointList[1].y = DELTA+CHIP_WIDTH/2;
+pointList[2].x = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].y = DELTA+(CHIP_WIDTH*3)/4;
+pointList[3].x = DELTA+CHIP_WIDTH;
+pointList[3].y = DELTA+CHIP_WIDTH/2;
+m_chipList[5].SetChip(6, pointList, 4);
+
+pointList[0].x = DELTA;
+pointList[0].y = DELTA+CHIP_WIDTH;
+pointList[1].x = DELTA+CHIP_WIDTH/4;
+pointList[1].y = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].x = DELTA+(CHIP_WIDTH*3)/4;
+pointList[2].y = DELTA+(CHIP_WIDTH*3)/4;
+pointLis ¨t[3].x = DELTA+CHIP_WIDTH/2; pointList[3].y = DELTA+CHIP_WIDTH; m_chipList[6].SetChip(7, pointList, 4); // 清理文档：关闭文档、建立新文档和打开文档前调用
+void CMyDoc::DeleteContents() 
+{
+Reset();
+CDocument::DeleteContents();
+}
+// 系列化：读写文档时自动调用
+void CMyDoc::Serialize(CArchive &ar)
+{
+for(int i=0; i<CHIP_COUNT; i++)
+m_chipList[i].Serialize(ar);
+}
+
+// 视图类 ///////////////////////////////////////////////////
+class CMyView : public CView
+{
+DECLARE_DYNCREATE(CMyView)
+BOOL m_bCaptured;
+CPoint m_pointMouse;
+int m_nCurrIndex;
+public:
+CMyView(){m_bCaptured = FALSE;}
+CMyDoc* GetDocument(){return (CMyDoc*)m_pDocument;}
+virtual void OnInitialUpdate();
+virtual BOOL OnPreparePrinting(CPrintInfo* pInfo);
+virtual void OnDraw(CDC* pDC);
+afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+DECLARE_MESSAGE_MAP()
+};
+IMPLEMENT_DYNCREATE(CMyView, CView)
+BEGIN_MESSAGE_MAP(CMyView, CView)
+ON_WM_LBUTTONDOWN()
+ON_WM_LBUTTONUP()
+ON_WM_MOUSEMOVE()
+ON_WM_RBUTTONDOWN()
+ON_COMMAND(ID_FILE_PRINT, CView::OnFilePrint)
+ON_COMMAND(ID_FILE_PRINT_DIRECT, CView::OnFilePrint)
+ON_COMMAND(ID_FILE_PRINT_PREVIEW, CView::OnFilePrintPreview)
+END_MESSAGE_MAP()
+// 更新初始化：当建立新文档或打开文档时调用
+void CMyView::OnInitialUpdate()
+{
+CView::OnInitialUpdate();
+Invalidate();
+}
+// 绘制视图：程序开始运行或窗体发生变化时自动调用
+void CMyView::OnDraw(CDC* pDC)
+{
+CMyDoc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+for(int i=0; i<CHIP_COUNT; i++)
+pDoc->m_chipList[i].DrawChip(pDC);
+}
+// 消息响应：用户点击鼠标左键时调用
+void CMyView::OnLButtonDown(UINT nFlags, CPoint point)
+{
+CMyDoc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+for(int i=CHIP_COUNT-1; i>=0; i--)
+if(pDoc->m_chipList[i].PtInChip(point))
+{
+SetCapture();
+m_bCaptured = TRUE;
+m_pointMouse = point;
+m_nCurrIndex = i;
+break;
+}
+}
+// 释放鼠标左键
+void CMyView::OnLButtonUp(UINT nFlags, CPoint point)
+{
+if(m_bCaptured)
+{
+::ReleaseCapture();
+m_bCaptured = FALSE;
+}
+}
+
+// 移动鼠标左键
+void CMyView::OnMouseMove(UINT nFlags, CPoint point)
+{
+if(m_bCaptured)
+{
+CMyDoc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+InvalidateRect(pDoc->m_chipList[m_nCurrIndex].GetRect());
+CSize offset(point-m_pointMouse);
+pDoc->m_chipList[m_nCurrIndex].MoveTo(offset);
+InvalidateRect(pDoc->m_chipList[m_nCurrIndex].GetRect());
+m_pointMouse = point;
+pDoc->SetModifiedFlag();
+}
+}
+// 按下鼠标右键: 旋转拼图块
+void CMyView::OnRButtonDown(UINT nFlags, CPoint point)
+{
+CMyDoc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+for(int i=CHIP_COUNT-1; i>=0; i--)
+if(pDoc->m_chipList[i].PtInChip(point))
+{
+InvalidateRect(pDoc->m_chipList[i].GetRect());
+pDoc->m_chipList[i].Rotation();
+InvalidateRect(pDoc->m_chipList[i].GetRect(), FALSE);
+pDoc->SetModifiedFlag();
+break;
+}
+}
+// 准备打印：设置打印参数
+BOOL CMyView::OnPreparePrinting(CPrintInfo* pInfo)
+{
+pInfo->SetMaxPage(1);
+return DoPreparePrinting(pInfo);
+}
+// 主框架类 //////////////////////////////////////////////////
+class CMainFrame : public CFrameWnd
+{
+DECLARE_DYNCREATE(CMainFrame)
+};
+IMPLEMENT_DYNCREATE(CMainFrame, CFrameWnd)
+// 应用程序类 ///////////////////////////////////////////////
+#define IDR_MAINFRAME 128 // 主框架的资源代号
+class CMyApp : public CWinApp
+{
+public:
+virtual BOOL InitInstance();
+DECLARE_MESSAGE_MAP()
+};
+BEGIN_MESSAGE_MAP(CMyApp, CWinApp)
+ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
+ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
+ON_COMMAND(ID_FILE_PRINT_SETUP, CWinApp::OnFilePrintSetup)
+END_MESSAGE_MAP()
+// 初始化程序实例：建立并登记文档模板
+BOOL CMyApp::InitInstance()
+{
+CSingleDocTemplate* pDocTemplate;
+pDocTemplate = new CSingleDocTemplate(
+IDR_MAINFRAME,
+RUNTIME_CLASS(CMyDoc),
+RUNTIME_CLASS(CMainFrame),
+RUNTIME_CLASS(CMyView));
+AddDocTemplate(pDocTemplate);
+CCommandLineInfo cmdInfo;
+ParseCommandLine(cmdInfo);
+if (!ProcessShellCommand(cmdInfo))
+return FALSE;
+m_pMainWnd->ShowWindow(SW_SHOWMAXIMIZED);
+return TRUE;
+}
+// 全局应用程序对象
+CMyApp theApp;
+
+
+7-23 为例9-3的吹泡泡程序添加一标识符为IDI_MAINICON的图标（该图标应已按11.8：“向项目中添加资源”中的方法建立并加入项目）。
+说 明：建立项目的方法见9.8：“用Visual C++集成开发环境开发Win32应用程序”。
+
+
+程 序：
+
+在例9-3程序前面添加一文件包含命令：
+#include ”resource.h”
+并将CMyApp::InitInstance（）函数修改为：
+BOOL CMyApp::InitInstance()
+{
+HICON hIcon;
+hIcon = LoadIcon(IDI_MAINICON); // 载入图标
+CMyWnd *pFrame = new CMyWnd;
+pFrame->Create(0,_T("吹泡泡程序"));
+pFrame->SetIcon(hIcon, TRUE); // 设置大图标
+pFrame->SetIcon(hIcon, FALSE); // 设置小图标
+pFrame->ShowWindow(m_nCmdShow);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+
+
+7-24 显示一张位图文件（.BMP）。
+说 明：首先建立Win32 Application空白项目和源代码文件（不要忘记设置项目使之可以使用MFC类库），然后按11.8：“向项目中添加资源”的方法为项目建立资源文件，并将待显示的位图文件作为资源装入项目。
+
+
+程 序：
+// Example 11-2：显示BMP图片
+#include <afxwin.h>
+#include "resource.h"
+// 框架窗口类
+class CMyWnd: public CFrameWnd
+{
+CBitmap m_Bitmap;
+int m_nHeight;
+int m_nWidth;
+public:
+CMyWnd();
+protected:
+afx_msg void OnPaint();
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CMyWnd, CFrameWnd)
+ON_WM_PAINT()
+END_MESSAGE_MAP()
+// 框架窗口类的成员函数
+CMyWnd::CMyWnd()
+{
+m_Bitmap.LoadBitmap(IDB_BITMAP1);
+BITMAP BM;
+m_Bitmap.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+}
+// 响应绘制窗口客户区消息
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+CDC MemDC;
+MemDC.CreateCompatibleDC(NULL);
+MemDC.SelectObject(&m_Bitmap);
+dc.BitBlt(0,0,m_nWidth,m_nHeight,&MemDC,0,0,SRCCOPY);
+}
+// 应用程序类
+class CMinMFCApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 应用程序类的成员函数
+// 初始化应用程序实例
+BOOL CMinMFCApp::InitInstance()
+{
+CMyWnd *pFrame = new CMyWnd;
+pFrame->Create(0,_T("Beautiful Cats”));
+pFrame->ShowWindow(m_nCmdShow);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 全局应用程序对象
+CMinMFCApp ThisApp;
+
+ 
+
+7-25 修改11-2，使之可以不同比例放大或缩小图象。
+说 明：使用StretchBlt（）函数代替BitBlt（）函数就可实现图象的缩放显示。在项目中加入一个弹出式菜单（将标识符改为IDR_MAINMENU），内含3个菜单选项：缩小1倍显示，按原尺寸显示和放大1倍显示，其标识符分别改为ID_SHRINK，ID_BESTFIT和ID_ZOOMOUT。
+
+
+程 序：
+// Example 11-3：以不同尺寸显示BMP图片
+#include <afxwin.h>
+#include "resource.h"
+// 框架窗口类
+class CMyWnd: public CFrameWnd
+{
+CBitmap m_Bitmap;
+float m_fTimes;
+int m_nHeight;
+int m_nWidth;
+public:
+CMyWnd();
+BOOL PreCreateWindow(CREATESTRUCT &cs);
+protected:
+afx_msg void OnPaint();
+afx_msg void OnShrink();
+afx_msg void OnBestFit();
+afx_msg void OnZoomOut();
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CMyWnd, CFrameWnd)
+ON_WM_PAINT()
+ON_COMMAND(ID_SHRINK, OnShrink)
+ON_COMMAND(ID_BESTFIT, OnBestFit)
+ON_COMMAND(ID_ZOOMOUT, OnZoomOut)
+END_MESSAGE_MAP()
+// 主窗口类的成员函数
+CMyWnd::CMyWnd()
+{
+BITMAP BM;
+m_Bitmap.LoadBitmap(IDB_BITMAP1);
+m_Bitmap.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+m_fTimes = 1.0;
+}
+// 装入菜单
+BOOL CMyWnd::PreCreateWindow(CREATESTRUCT &cs)
+{
+cs.hMenu = LoadMenu(NULL, MAKEINTRESOURCE(IDR_MAINMENU));
+return CFrameWnd::PreCreateWindow(cs);
+}
+// 缩小图象
+void CMyWnd::OnShrink()
+{
+m_fTimes = 0.5;
+Invalidate();
+}
+// 放大图象
+void CMyWnd::OnZoomOut()
+{
+m_fTimes = 2.0;
+Invalidate();
+}
+// 原样显示
+void CMyWnd::OnBestFit()
+{
+m_fTimes = 1.0;
+Invalidate();
+}
+// 响应绘制窗口客户区消息
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+CDC MemDC;
+MemDC.CreateCompatibleDC(NULL);
+MemDC.SelectObject(&m_Bitmap);
+dc.StretchBlt(0, 0, (int)(m_nWidth*m_fTimes),
+(int)(m_nHeight*m_fTimes),
+&MemDC, 0, 0, m_nWidth, m_nHeight, SRCCOPY);
+}
+// 应用程序类
+class CMyApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 应用窗口类的成员函数
+// 初始化应用程序实例
+BOOL CMyApp::InitInstance()
+{
+CMyWnd *pFrame = new CMyWnd;
+pFrame->Create(0,_T("Show Bitmap 1.0"));
+pFrame->ShowWindow(SW_SHOWMAXIMIZED);
+pFrame->UpdateWindow(); 
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 全局应用程序对象
+CMyApp ThisApp;
+
+ 
+
+7-26 拼图程序。
+设计思想：将一张图片切分成若干小片，打乱顺序任意显示。用户可用鼠标拖动各小片到正确位置以恢复用来的图象。
+说 明：首先创建一Win32 Application空项目，然后向项目中添加C++ Source File（源程序）和Resource Script（资源描述）文件。在添加资源描述文件后应将其关闭。
+按本单元介绍的有关内容为本程序添加图标、字符串（窗口标题）和下拉菜单（标题为“游戏”）等资源，其标识符均取IDR_MAINFRAME。
+为“游戏”下拉菜单添4个菜单选项，一个是“自动拼图”， 和一个“结束”，标识符分别为ID_BEGIN和ID_END。剩下3个用来控制拼图的难度，标识符分别为ID_GRAD01，ID_GRAD02和ID_GRAD03。
+另选一幅漂亮的图片，作为资源装入项目。该图片即拼图的底图。然后输入以下程序，注意在编译前选择使用MFC。
+
+
+程 序：
+// Example 11-4: 拼图程序
+#include <afxwin.h>
+#include <afxext.h>
+#include <stdlib.h>
+#include <time.h>
+#include "resource.h"
+#define MAX_CHIPS 500
+// 派生一个框架窗口类
+class CPuzzleWnd: public CFrameWnd
+{
+CBitmap m_bmpPuzzle; // 位图
+int m_nPuzzleWidth; // 位图宽
+int m_nPuzzleHeight; // 位图高
+int m_nColCount; // 每行拼图块数
+int m_nRowCount; // 每列拼图块数
+CRect m_rectChips[MAX_CHIPS]; // 每个拼图块的位置
+int m_nChipWidth; // 拼图块宽
+int m_nChipHeight; // 拼图块高
+BOOL m_bCaptured;
+CPoint m_pointMouse;
+int m_nCurrIndex;
+public:
+CPuzzleWnd();
+void InitPuzzle(int colcount, int rowcount);
+protected:
+afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+afx_msg void OnPaint();
+afx_msg void OnShowFig();
+afx_msg void OnGrad01();
+afx_msg void OnGrad02();
+afx_msg void OnGrad03();
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CPuzzleWnd, CFrameWnd)
+ON_WM_LBUTTONDOWN()
+ON_WM_LBUTTONUP()
+ON_WM_MOUSEMOVE()
+ON_WM_PAINT()
+ON_COMMAND(ID_SHOWFIG, OnShowFig)
+ON_COMMAND(ID_GRAD01, OnGrad01)
+ON_COMMAND(ID_GRAD02, OnGrad02)
+ON_COMMAND(ID_GRAD03, OnGrad03)
+END_MESSAGE_MAP()
+// 主窗口类的成员函数
+// 构造函数: 装入位图资源
+CPuzzleWnd::CPuzzleWnd()
+{
+BITMAP BM;
+m_bmpPuzzle.LoadBitmap(IDB_BITMAP1);
+m_bmpPuzzle.GetObject(sizeof(BM), &BM);
+m_nPuzzleWidth = BM.bmWidth;
+m_nPuzzleHeight = BM.bmHeight;
+InitPuzzle(4, 3);
+m_bCaptured = FALSE;
+}
+// 初始化拼图数组
+void CPuzzleWnd::InitPuzzle(int colcount, int rowcount)
+{
+m_nColCount = colcount;
+m_nRowCount = rowcount;
+m_nChipWidth = m_nPuzzleWidth/m_nColCount;
+m_nChipHeight = m_nPuzzleHeight/m_nRowCount;
+srand((unsigned)time( NULL));
+for(int row=0; row<m_nRowCount; row++)
+for(int col=0; col<m_nColCount; col++)
+{
+int index = row*m_nColCount+col;
+m_rectChips[index].left = rand()%m_nPuzzleWidth+20;
+m_rectChips[index].top = rand()%m_nPuzzleHeight+20;
+m_rectChips[index].right = m_rectChips[index].left
++m_nChipWidth;
+m_rectChips[index].bottom = m_rectChips[index].top
++m_nChipHeight;
+}
+}
+// 自动完成拼图
+void CPuzzleWnd::OnShowFig()
+{
+for(int row=0; row<m_nRowCount; row++)
+for(int col=0; col<m_nColCount; col++)
+{
+int index = row*m_nColCount+col;
+m_rectChips[index].left = col*m_nChipWidth;
+m_rectChips[index].top = row*m_nChipHeight;
+m_rectChips[index].right = m_rectChips[index].left
++m_nChipWidth;
+m_rectChips[index].bottom = m_rectChips[index].top
++m_nChipHeight;
+}
+Invalidate();
+}
+// 设置一级难度
+void CPuzzleWnd::OnGrad01()
+{
+InitPuzzle(4, 3);
+Invalidate();
+}
+// 设置二级难度
+void CPuzzleWnd::OnGrad02()
+{
+InitPuzzle(8, 6);
+Invalidate();
+}
+// 设置三级难度
+void CPuzzleWnd::OnGrad03()
+{
+InitPuzzle(16, 12);
+Invalidate();
+}
+// 按下鼠标左键 
+void CPuzzleWnd::OnLButtonDown(UINT nFlags, CPoint point)
+{
+for(int row=m_nRowCount-1; row>=0; row--)
+for(int col=m_nColCount-1; col>=0; col--)
+{
+int index = row*m_nColCount+col;
+if(m_rectChips[index].PtInRect(point))
+{
+SetCapture();
+m_bCaptured = TRUE;
+m_pointMouse = point;
+m_nCurrIndex = index;
+return;
+}
+}
+}
+// 释放鼠标左键
+void CPuzzleWnd::OnLButtonUp(UINT nFlags, CPoint point)
+{
+if(m_bCaptured)
+{
+::ReleaseCapture();
+m_bCaptured = FALSE;
+}
+}
+// 移动鼠标左键
+void CPuzzleWnd::OnMouseMove(UINT nFlags, CPoint point)
+{
+if(m_bCaptured)
+{
+InvalidateRect(m_rectChips[m_nCurrIndex]);
+CSize offset(point-m_pointMouse);
+m_rectChips[m_nCurrIndex] += offset;
+InvalidateRect(m_rectChips[m_nCurrIndex], FALSE);
+m_pointMouse = point;
+}
+}
+// 显示当前拼图
+void CPuzzleWnd::OnPaint()
+{
+CPaintDC dc(this);
+CDC MemDC;
+MemDC.CreateCompatibleDC(NULL);
+MemDC.SelectObject(&m_bmpPuzzle);
+for(int row=0; row<m_nRowCount; row++)
+for(int col=0; col<m_nColCount; col++)
+{
+int index = row*m_nColCount+col;
+dc.BitBlt(m_rectChips[index].left,
+m_rectChips[index].top,
+m_nChipWidth,
+m_nChipHeight,
+&MemDC,
+col*m_nChipWidth,
+row*m_nChipHeight,
+SRCCOPY);
+}
+}
+// 应用程序类
+class CPuzzleApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 初始化应用程序实例
+BOOL CPuzzleApp::InitInstance()
+{
+CPuzzleWnd *pFrame = new CPuzzleWnd;
+pFrame->LoadFrame(IDR_MAINMENU);
+pFrame->ShowWindow(SW_SHOWMAXIMIZED);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 全局应用程序对象
+CPuzzleApp TheApp;
+
+// Example 11-5: 地空战游戏程序
+#include <afxwin.h>
+#include "resource.h"
+
+// 定义飞机类
+class CPlane: public CObject
+{
+CPoint m_pointPlane; // 飞机位置
+CBitmap m_bmpPlane; // 飞机图象
+int m_nWidth; // 飞机图象宽
+int m_nHeight; // 飞机图象高
+public:
+CPlane();
+void ShowPlane(CDC *pDC, CDC *pMemDC, CRect Client);
+CRect GetPlane(){return CRect(m_pointPlane.x, m_pointPlane.y,
+m_pointPlane.x+m_nWidth, m_pointPlane.y+m_nHeight);}
+void ChangePos();
+void ResetPos(){m_pointPlane.x = 0;}
+};
+// 飞机类的成员函数
+// 构造函数
+CPlane::CPlane()
+{
+m_pointPlane = CPoint(0, 50);
+m_bmpPlane.LoadBitmap(IDB_PLANE);
+BITMAP BM;
+m_bmpPlane.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+}
+// 显示飞机
+void CPlane::ShowPlane(CDC *pDC, CDC *pMemDC, CRect Client)
+{
+pMemDC->SelectObject(&m_bmpPlane);
+pDC->BitBlt(m_pointPlane.x, m_pointPlane.y,
+m_nWidth, m_nHeight, pMemDC,0,0,SRCAND);
+}
+// 改变飞机位置
+void CPlane::ChangePos()
+{
+if(m_pointPlane.x>788)
+m_pointPlane.x = 0;
+else
+m_pointPlane.x += 10;
+}
+
+// 定义炸弹类
+class CBomb: public CObject
+{
+CPoint m_pointBomb; // 炸弹位置
+CBitmap m_bmpBomb; // 炸弹图象
+int m_nWidth; // 炸弹图象高
+int m_nHeight; // 炸弹图象宽
+public:
+CBomb();
+void ShowBomb(CDC *pDC, CDC *pMemDC, CRect Client);
+CRect GetBomb(){return CRect(m_pointBomb.x, m_pointBomb.y,
+m_pointBomb.x+m_nWidth, m_pointBomb.y+m_nHeight);}
+void ChangePos(int x);
+void ResetPos(){m_pointBomb.x=0, m_pointBomb.y=80;}
+};
+// 炸弹类成员函数
+// 炸弹类构造函数
+CBomb::CBomb()
+{
+m_pointBomb.x = 0;
+m_pointBomb.y = 80;
+m_bmpBomb.LoadBitmap(IDB_BOMB);
+BITMAP BM;
+m_bmpBomb.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+}
+// 显示炸弹
+void CBomb::ShowBomb(CDC *pDC, CDC *pMemDC, CRect Client)
+{
+pMemDC->SelectObject(&m_bmpBomb);
+pDC->BitBlt(m_pointBomb.x, m_pointBomb.y,
+m_nWidth, m_nHeight, pMemDC, 0, 0, SRCAND);
+}
+// 改变位置
+void CBomb::ChangePos(int x)
+{
+m_pointBomb.y += 20;
+if(m_pointBomb.y>480)
+m_pointBomb.y = 80;
+m_pointBomb.x = x;
+}
+
+// 定义高炮类
+class CTank: public CObject
+{
+CPoint m_pointTank; // 高炮位置
+CBitmap m_bmpTank; // 高炮图象
+int m_nWidth; // 高炮图象宽
+int m_nHeight; // 高炮图象高
+public:
+CTank();
+void ShowTank(CDC *pDC, CDC *pMemDC, CRect Client);
+CRect GetTank(){return CRect(m_pointTank.x, m_pointTank.y,
+m_pointTank.x+m_nWidth, m_pointTank.y+m_nHeight);}
+void ChangePos(int tag);
+void ResetPos(){m_pointTank.x = 350;}
+};
+// 高炮类成员函数
+// 高炮类构造函数
+CTank::CTank()
+{
+m_pointTank.x = 350;
+m_pointTank.y = 450;
+m_bmpTank.LoadBitmap(IDB_TANK);
+BITMAP BM;
+m_bmpTank.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+}
+// 显示高炮
+void CTank::ShowTank(CDC *pDC, CDC *pMemDC, CRect Client)
+{
+pMemDC->SelectObject(&m_bmpTank);
+pDC->BitBlt(m_pointTank.x, m_pointTank.y,
+m_nWidth, m_nHeight, pMemDC,0,0,SRCAND);
+}
+// 改变位置
+void CTank::ChangePos(int tag)
+{
+if(tag == 0 && m_pointTank.x > 0)
+m_pointTank.x -= 20;
+else if(tag == 1 && m_pointTank.x+m_nWidth < 798)
+m_pointTank.x += 20;
+}
+
+// 定义炮弹类
+class CStone: public CObject
+{
+CPoint m_pointStone; // 炮弹位置
+CBitmap m_bmpStone; // 炮弹图象
+int m_nWidth; // 炮弹图象宽
+int m_nHeight; // 炮弹图象高
+BOOL m_bShot; // 是否已发射
+public:
+CStone();
+BOOL HaveStone(){return !m_bShot;}
+void Shot(int x);
+void ShowStone(CDC *pDC, CDC *pMemDC, CRect Client);
+CRect GetStone(){return CRect(m_pointStone.x, m_pointStone.y,
+m_pointStone.x+m_nWidth, m_pointStone.y+m_nHeight);}
+void ChangePos();
+void ResetPos(){m_bShot = FALSE;}
+void Refill(){m_bShot = FALSE;}
+};
+// 炮弹类成员函数
+// 炮弹类构造函数
+CStone::CStone()
+{
+m_bShot = FALSE;
+m_bmpStone.LoadBitmap(IDB_STONE);
+BITMAP BM;
+m_bmpStone.GetBitmap(&BM);
+m_nWidth = BM.bmWidth;
+m_nHeight = BM.bmHeight;
+}
+// 发射
+void CStone::Shot(int x)
+{
+m_bShot = TRUE;
+m_pointStone.x = x+48;
+m_pointStone.y = 440;
+}
+// 显示炮弹
+void CStone::ShowStone(CDC *pDC, CDC *pMemDC, CRect Client)
+{
+if(m_bShot)
+{
+pMemDC->SelectObject(&m_bmpStone);
+pDC->BitBlt(m_pointStone.x, m_pointStone.y,
+m_nWidth, m_nHeight, pMemDC,0,0,SRCAND);
+}
+}
+// 改变位置
+void CStone::ChangePos()
+{
+if(m_bShot)
+m_pointStone.y -= 20;
+}
+
+// 自定义消息
+#define ON_WM_GAMEOVER 0x0402
+#define I_SHOT_YOU 0
+#define YOU_SHOT_ME 1
+
+// 定义框架窗口类
+class CMyWnd: public CFrameWnd
+{
+CPlane m_Plane;
+CBomb m_Bomb;
+CTank m_Tank;
+CStone m_Stone;
+CPoint m_pointMoutain[5];
+public:
+CMyWnd();
+void DrawFields(CDC *pDC, CRect Client);
+BOOL ShotOn(CRect &body1, CRect &body2);
+protected:
+afx_msg void OnPaint();
+afx_msg void OnBegin();
+afx_msg void OnEnd();
+afx_msg void OnTimer(UINT nIDEvent);
+afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+afx_msg void OnGameOver(UINT tag);
+DECLARE_MESSAGE_MAP()
+};
+// 消息映射
+BEGIN_MESSAGE_MAP(CMyWnd,CFrameWnd)
+ON_WM_PAINT()
+ON_COMMAND(ID_BEGIN, OnBegin)
+ON_COMMAND(ID_END, OnEnd)
+ON_WM_TIMER()
+ON_WM_KEYDOWN()
+ON_MESSAGE(ON_WM_GAMEOVER, OnGameOver)
+END_MESSAGE_MAP()
+// 框架窗口类的成员函数
+// 构造函数
+CMyWnd::CMyWnd()
+{
+m_pointMoutain[0] = CPoint(300, 400);
+m_pointMoutain[1] = CPoint(400, 300);
+m_pointMoutain[2] = CPoint(500, 350);
+m_pointMoutain[3] = CPoint(600, 250);
+m_pointMoutain[4] = CPoint(800, 400);
+}
+// 更新窗口客户区
+void CMyWnd::OnPaint()
+{
+CPaintDC dc(this);
+CDC MemDC;
+MemDC.CreateCompatibleDC(NULL);
+CRect rect;
+GetClientRect(&rect);
+DrawFields(&dc, rect); // 画战场
+m_Plane.ShowPlane(&dc, &MemDC, rect); // 画对方飞机
+m_Bomb.ShowBomb(&dc, &MemDC, rect); // 画炸弹
+m_Tank.ShowTank(&dc, &MemDC, rect); // 画己方防空导弹车
+m_Stone.ShowStone(&dc, &MemDC, rect); // 画导弹 
+}
+// 响应菜单消息: 开始游戏
+void CMyWnd::OnBegin()
+{
+m_Bomb.ResetPos();
+m_Plane.ResetPos();
+m_Tank.ResetPos();
+m_Stone.ResetPos();
+Invalidate();
+SetTimer(1, 100, NULL);
+}
+// 响应菜单消息: 游戏结束
+void CMyWnd::OnEnd()
+{
+KillTimer(1);
+PostMessage(WM_QUIT);
+}
+// 定时器消息响应函数
+void CMyWnd::OnTimer(UINT nIDEvent)
+{
+InvalidateRect(m_Plane.GetPlane()); // 修改飞机位置
+m_Plane.ChangePos();
+InvalidateRect(m_Plane.GetPlane(), FALSE);
+InvalidateRect(m_Bomb.GetBomb()); // 修改炸弹位置
+m_Bomb.ChangePos(m_Plane.GetPlane().left);
+InvalidateRect(m_Bomb.GetBomb(), FALSE);
+if(!m_Stone.HaveStone()) // 修改炮弹位置
+{
+CRect rect = m_Stone.GetStone();
+if(rect.top < 3)
+m_Stone.Refill();
+else
+{
+InvalidateRect(rect);
+m_Stone.ChangePos();
+}
+InvalidateRect(m_Stone.GetStone(), FALSE);
+}
+// 判断射击效果
+if(!m_Stone.HaveStone() && ShotOn(m_Plane.GetPlane(), m_Stone.GetStone()))
+SendMessage(ON_WM_GAMEOVER, YOU_SHOT_ME);
+else if(ShotOn(m_Tank.GetTank(), m_Bomb.GetBomb()))
+SendMessage(ON_WM_GAMEOVER, I_SHOT_YOU);
+}
+// 自定义的游戏结束消息响应函数
+void CMyWnd::OnGameOver(UINT tag)
+{
+KillTimer(1);
+if(tag == I_SHOT_YOU)
+MessageBox("我砸到你了!!!");
+else
+MessageBox("你击中我了!!!");
+}
+// 按键消息响应函数
+void CMyWnd::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
+{
+if(nChar == VK_LEFT) // 使用 < 键左移高炮
+{
+InvalidateRect(m_Tank.GetTank());
+m_Tank.ChangePos(0);
+InvalidateRect(m_Tank.GetTank(), FALSE);
+}
+else if(nChar == VK_RIGHT) // 使用 > 键右移高炮
+{
+InvalidateRect(m_Tank.GetTank());
+m_Tank.ChangePos(1);
+InvalidateRect(m_Tank.GetTank());
+}
+else if(nChar == 32 && m_Stone.HaveStone()) // 使用空格键发炮
+m_Stone.Shot(m_Tank.GetTank().left); 
+}
+// 画战场
+void CMyWnd::DrawFields(CDC *pDC, CRect Client)
+{
+CBrush *pOldBrush, brushSky, brushGrass, brushMoutain;
+CRect rect(Client);
+brushSky.CreateSolidBrush(RGB(127, 200, 255)); // 画天空
+pOldBrush = pDC->SelectObject(&brushSky);
+pDC->Rectangle(rect);
+pDC->SelectObject(pOldBrush);
+brushGrass.CreateSolidBrush(RGB(0, 255, 0)); // 画草地
+pOldBrush = pDC->SelectObject(&brushGrass);
+rect.top = 400;
+pDC->Rectangle(rect);
+pDC->SelectObject(pOldBrush);
+brushMoutain.CreateSolidBrush(RGB(125, 50, 0)); // 画大山
+pOldBrush = pDC->SelectObject(&brushMoutain);
+pDC->Polygon(m_pointMoutain, 5);
+pDC->SelectObject(pOldBrush);
+}
+// 判断射击效果 
+BOOL CMyWnd::ShotOn(CRect &body1, CRect &body2)
+{
+return body1.PtInRect(body2.TopLeft());
+}
+
+// 定义应用程序类
+class CMyApp: public CWinApp
+{
+public:
+BOOL InitInstance();
+};
+// 初始化实例函数
+BOOL CMyApp::InitInstance()
+{
+CMyWnd *pFrame = new CMyWnd;
+pFrame->LoadFrame(IDR_MAINFRAME);
+pFrame->ShowWindow(SW_SHOWMAXIMIZED);
+this->m_pMainWnd = pFrame;
+return TRUE;
+}
+// 说明应用程序类的全局对象
+CMyApp ThisApp;
+
+ 

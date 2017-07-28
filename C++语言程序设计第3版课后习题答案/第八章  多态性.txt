@@ -1,0 +1,998 @@
+第 八 章        多态性
+
+
+8-1 什么叫做多态性 ?在C++中是如何实现多态的？
+
+
+解： 
+多态是指同样的消息被不同类型的对象接收时导致完全不同的行为，是对类的特定成员函数的再抽象。C++支持的多态有多种类型，重载(包括函数重载和运算符重载)和虚函数是其中主要的方式。 
+
+ 
+
+8-2 什么叫做抽象类？抽象类有何作用？抽象类的派生类是否一定要给出纯虚函数的实现？
+
+
+解： 
+带有纯虚函数的类是抽象类。抽象类的主要作用是通过它为一个类族建立一个公共的接口，使它们能够更有效地发挥多态特性。抽象类声明了一组派生类共同操作接口的通用语义，而接口的完整实现，即纯虚函数的函数体，要由派生类自己给出。但抽象类的派生类并非一定要给出纯虚函数的实现，如果派生类没有给出纯虚函数的实现，这个派生类仍然是一个抽象类。
+
+
+8-3 声明一个参数为整型，无返回值，名为fn1的虚函数。
+
+
+解： 
+virtual void fn1( int );
+
+
+8-4 在C++中，能否声明虚构造函数？为什么？能否声明虚析构函数？有何用途？
+
+
+解： 
+在C++中，不能声明虚构造函数，多态是不同的对象对同一消息有不同的行为特性，虚函数作为运行过程中多态的基础，主要是针对对象的，而构造函数是在对象产生之前运行的，因此虚构造函数是没有意义的；可以声明虚析构函数，析构函数的功能是在该类对象消亡之前进行一些必要的清理工作，如果一个类的析构函数是虚函数，那么，由它派生而来的所有子类的析构函数也是虚函数。析构函数设置为虚函数之后，在使用指针引用时可以动态联编，实现运行时的多态，保证使用基类的指针就能够调用适当的析构函数针对不同的对象进行清理工作。
+
+
+8-5 实现重载函数Double(x)，返回值为输入参数的两倍；参数分别为整型、长整型、浮点型、双精度型，返回值类型与参数一样。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+int Double(int);
+long Double(long);
+float Double(float);
+double Double(double);
+
+int main()
+{
+int myInt = 6500;
+long myLong = 65000;
+float myFloat = 6.5F;
+double myDouble = 6.5e20;
+
+int doubledInt;
+long doubledLong;
+float doubledFloat;
+double doubledDouble;
+
+cout << "myInt: " << myInt << "\n";
+cout << "myLong: " << myLong << "\n";
+cout << "myFloat: " << myFloat << "\n";
+cout << "myDouble: " << myDouble << "\n";
+
+doubledInt = Double(myInt);
+doubledLong = Double(myLong);
+doubledFloat = Double(myFloat);
+doubledDouble = Double(myDouble);
+
+cout << "doubledInt: " << doubledInt << "\n";
+cout << "doubledLong: " << doubledLong << "\n";
+cout << "doubledFloat: " << doubledFloat << "\n";
+cout << "doubledDouble: " << doubledDouble << "\n";
+
+return 0;
+}
+
+int Double(int original)
+{
+cout << "In Double(int)\n";
+return 2 * original;
+}
+
+long Double(long original)
+{
+cout << "In Double(long)\n";
+return 2 * original;
+}
+
+float Double(float original)
+{
+cout << "In Double(float)\n";
+return 2 * original;
+}
+
+double Double(double original)
+{
+cout << "In Double(double)\n";
+return 2 * original;
+}
+
+程序运行输出：
+myInt: 6500
+myLong: 65000
+myFloat: 6.5
+myDouble: 6.5e+20
+In Double(int)
+In Double(long)
+In Double(float)
+In Double(double)
+DoubledInt: 13000
+DoubledLong: 130000
+DoubledFloat: 13
+DoubledDouble: 1.3e+21
+
+
+8-6 定义一个Rectangle类，有长itsWidth、宽itsLength等属性，重载其构造函数Rectangle()和Rectangle(int width， int length)。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Rectangle
+{
+public:
+Rectangle();
+Rectangle(int width, int length);
+~Rectangle() {}
+int GetWidth() const { return itsWidth; }
+int GetLength() const { return itsLength; }
+private:
+int itsWidth;
+int itsLength;
+};
+
+Rectangle::Rectangle()
+{
+itsWidth = 5;
+itsLength = 10;
+}
+
+Rectangle::Rectangle (int width, int length)
+{
+itsWidth = width;
+itsLength = length;
+}
+
+int main()
+{
+Rectangle Rect1;
+cout << "Rect1 width: " << Rect1.GetWidth() << endl;
+cout << "Rect1 length: " << Rect1.GetLength() << endl;
+
+int aWidth, aLength;
+cout << "Enter a width: ";
+cin >> aWidth;
+cout << "\nEnter a length: ";
+cin >> aLength;
+
+Rectangle Rect2(aWidth, aLength);
+cout << "\nRect2 width: " << Rect2.GetWidth() << endl;
+cout << "Rect2 length: " << Rect2.GetLength() << endl;
+return 0;
+}
+
+程序运行输出：
+Rect1 width: 5
+Rect1 length: 10
+Enter a width: 20
+
+Enter a length: 50
+
+Rect2 width: 20
+Rect2 length: 50
+
+
+8-7 定义计数器Counter类，对其重载运算符 + 。
+
+
+解： 
+源程序：
+typedef unsigned short USHORT;
+#include <iostream.h>
+
+class Counter
+{
+public:
+Counter();
+Counter(USHORT initialValue);
+~Counter(){}
+USHORT GetItsVal()const { return itsVal; }
+void SetItsVal(USHORT x) {itsVal = x; }
+Counter operator+ (const Counter &);
+private:
+USHORT itsVal;
+};
+
+Counter::Counter(USHORT initialValue):
+itsVal(initialValue)
+{
+}
+
+Counter::Counter():
+itsVal(0)
+{
+}
+
+Counter Counter::operator+ (const Counter & rhs)
+{
+return Counter(itsVal + rhs.GetItsVal());
+}
+
+int main()
+{
+Counter varOne(2)， varTwo(4)， varThree;
+varThree = varOne + varTwo;
+cout << "varOne: " << varOne.GetItsVal()<< endl;
+cout << "varTwo: " << varTwo.GetItsVal() << endl;
+cout << "varThree: " << varThree.GetItsVal() << endl;
+
+return 0;
+}
+
+程序运行输出：
+varOne: 2
+varTwo: 4
+varThree: 6
+
+
+8-8 定义一个哺乳动物Mammal类，再由此派生出狗Dog类，二者都定义 Speak()成员函数，基类中定义为虚函数，定义一个Dog类的对象，调用Speak函数，观察运行结果。
+
+
+解： 
+源程序：
+#include <iostream.h>
+class Mammal
+{
+public:
+Mammal():itsAge(1) { cout << "Mammal constructor...\n"; }
+~Mammal() { cout << "Mammal destructor...\n"; }
+virtual void Speak() const { cout << "Mammal speak!\n"; }
+};
+
+class Dog : public Mammal
+{
+public:
+Dog() { cout << "Dog Constructor...\n"; }
+~Dog() { cout << "Dog destructor...\n"; }
+void Speak()const { cout << "Woof!\n"; }
+};
+
+int main()
+{
+Mammal *pDog = new Dog;
+pDog->Speak();
+
+return 0;
+}
+程序运行输出：
+Mammal constructor...
+Dog constructor...
+Woof!
+Dog destructor...
+Mammal destructor...
+
+
+8-9 定义一个Shape抽象类，在此基础上派生出Rectangle和Circle，二者都有GetArea()函数计算对象的面积，GetPerim()函数计算对象的周长。
+
+
+解： 
+源程序：
+#include <iostream.h>
+
+class Shape
+{
+public:
+Shape(){}
+~Shape(){}
+virtual float GetArea() =0 ;
+virtual float GetPerim () =0 ;
+};
+
+class Circle : public Shape
+{
+public:
+Circle(float radius):itsRadius(radius){}
+~Circle(){}
+float GetArea() { return 3.14 * itsRadius * itsRadius; }
+float GetPerim () { return 6.28 * itsRadius; }
+
+private:
+float itsRadius;
+};
+
+class Rectangle : public Shape
+{
+public:
+Rectangle(float len， float width): itsLength(len)， itsWidth(width){};
+~Rectangle(){};
+virtual float GetArea() { return itsLength * itsWidth; }
+float GetPerim () { return 2 * itsLength + 2 * itsWidth; }
+virtual float GetLength() { return itsLength; }
+virtual float GetWidth() { return itsWidth; }
+private:
+float itsWidth;
+float itsLength;
+};
+
+void main()
+{
+Shape * sp;
+
+sp = new Circle(5);
+cout << "The area of the Circle is " << sp->GetArea () << endl;
+cout << "The perimeter of the Circle is " << sp->GetPerim () << endl;
+delete sp;
+sp = new Rectangle(4，6);
+cout << "The area of the Rectangle is " << sp->GetArea() << endl;
+cout << "The perimeter of the Rectangle is " << sp->GetPerim () << endl;
+delete sp;
+}
+
+程序运行输出：
+The area of the Circle is 78.5
+The perimeter of the Circle is 31.4
+The area of the Rectangle is 24
+The perimeter of the Rectangle is 20
+
+
+8-10 对Point类重载++（自增）、--（自减）运算符
+
+
+解： 
+#include <iostream.h>
+
+class Point
+{
+public:
+
+Point& operator++();
+Point operator++(int);
+
+Point& operator--();
+Point operator--(int);
+
+Point() { _x = _y = 0; }
+
+int x() { return _x; }
+int y() { return _y; }
+private:
+int _x, _y;
+};
+
+Point& Point::operator++()
+{
+_x++;
+_y++;
+return *this;
+}
+
+Point Point::operator++(int)
+{
+Point temp = *this;
+++*this;
+return temp;
+}
+
+Point& Point::operator--()
+{
+_x--;
+_y--;
+return *this;
+}
+
+Point Point::operator--(int)
+{
+Point temp = *this;
+--*this;
+return temp;
+}
+
+void main()
+{
+Point A;
+cout << "A的值为：" << A.x() << " , " << A.y() << endl;
+A++;
+cout << "A的值为：" << A.x() << " , " << A.y() << endl;
+++A;
+cout << "A的值为：" << A.x() << " , " << A.y() << endl;
+A--;
+cout << "A的值为：" << A.x() << " , " << A.y() << endl;
+--A;
+cout << "A的值为：" << A.x() << " , " << A.y() << endl;
+}
+
+程序运行输出：
+A的值为：0 , 0
+A的值为：1 , 1
+A的值为：2 , 2
+A的值为：1 , 1
+A的值为：0 , 0
+
+
+8-11 定义一个基类BaseClass，从它派生出类DerivedClass，BaseClass有成员函数fn1()、fn2()，fn1()是虚函数，DerivedClass也有成员函数fn1()、fn2()，在主程序中定义一个DerivedClass的对象，分别用BaseClass和DerivedClass的指针来调用fn1()、fn2()，观察运行结果。
+
+
+解： 
+#include <iostream.h>
+
+class BaseClass
+{
+public:
+virtual void fn1();
+void fn2();
+};
+void BaseClass::fn1()
+{
+cout << "调用基类的虚函数fn1()" << endl;
+}
+void BaseClass::fn2()
+{
+cout << "调用基类的非虚函数fn2()" << endl;
+}
+
+
+class DerivedClass : public BaseClass
+{
+public:
+void fn1();
+void fn2();
+};
+void DerivedClass::fn1()
+{
+cout << "调用派生类的函数fn1()" << endl;
+}
+
+void DerivedClass::fn2()
+{
+cout << "调用派生类的函数fn2()" << endl;
+}
+
+void main()
+{
+DerivedClass aDerivedClass;
+DerivedClass *pDerivedClass = &aDerivedClass;
+BaseClass *pBaseClass = &aDerivedClass;
+
+pBaseClass->fn1();
+pBaseClass->fn2();
+pDerivedClass->fn1();
+pDerivedClass->fn2();
+}
+
+程序运行输出：
+调用派生类的函数fn1()
+调用基类的非虚函数fn2()
+调用派生类的函数fn1()
+调用派生类的函数fn2()
+
+ 
+
+8-12 定义一个基类BaseClass，从它派生出类DerivedClass，BaseClass中定义虚析构函数，在主程序中将一个DerivedClass的对象地址赋给一个BaseClass的指针，观察运行过程。
+
+
+解： 
+#include <iostream.h>
+
+class BaseClass {
+public:
+virtual ~BaseClass() {
+cout << "~BaseClass()" << endl;
+}
+};
+
+class DerivedClass : public BaseClass {
+public:
+~DerivedClass() {
+cout << "~DerivedClass()" << endl;
+}
+};
+
+void main()
+{
+BaseClass* bp = new DerivedClass;
+delete bp; 
+} 
+
+程序运行输出：
+~DerivedClass()
+~BaseClass()
+
+
+8-13 定义Point类，有成员变量X、Y，为其定义友元函数实现重载+。
+
+
+解： 
+#include <iostream.h>
+
+class Point
+{
+public:
+Point() { X = Y = 0; }
+Point( unsigned x, unsigned y ) { X = x; Y = y; }
+
+unsigned x() { return X; }
+unsigned y() { return Y; }
+void Print() { cout << "Point(" << X << ", " << Y << ")" << endl; }
+
+friend Point operator+( Point& pt, int nOffset );
+friend Point operator+( int nOffset, Point& pt );
+
+private:
+unsigned X;
+unsigned Y;
+};
+
+Point operator+( Point& pt, int nOffset )
+{
+Point ptTemp = pt;
+ptTemp.X += nOffset;
+ptTemp.Y += nOffset;
+
+return ptTemp;
+}
+
+Point operator+( int nOffset, Point& pt )
+{
+Point ptTemp = pt;
+ptTemp.X += nOffset;
+ptTemp.Y += nOffset;
+
+return ptTemp;
+}
+
+void main()
+{
+Point pt( 10, 10 );
+pt.Print();
+
+pt = pt + 5; // Point + int
+pt.Print();
+
+pt = 10 + pt; // int + Point
+pt.Print();
+}
+
+程序运行输出：
+Point(10, 10)
+Point(15, 15)
+Point(25, 25)
+
+
+
+
+8-14 为某公司设计一个人事管理系统，其基本功能为输入、编辑、查看和保存公司的人事档案。职工人事档案包括姓名、性别、出生日期、婚姻状况、所在部门、职务和工资。
+
+
+程 序：
+
+由于列表框尚未初始化，所以为CEmpDlg类重载OnInitDialog（）成员函数（可使用ClassWizard完成），并添加相应代码：
+BOOL CEmpDlg::OnInitDialog() 
+{
+CListBox *pLB = (CListBox *)GetDlgItem(IDC_DEPT);
+pLB->InsertString(-1, "办公室");
+pLB->InsertString(-1, "开发部");
+pLB->InsertString(-1, "生产部");
+pLB->InsertString(-1, "销售部");
+pLB->InsertString(-1, "人事部");
+return CDialog::OnInitDialog();
+}
+其中GetDlgItem（）为对话框类的成员函数，用于取对话框控件的指针。
+为项目添加有关自定义的职工类CEmployee。选择Developer Studio菜单的Insert/New Class…选项，调出New Class对话框。在Class Type组合框中选择Generic（普通类），填写类名CEmployee，在对话框下方的Base class (es)框中输入基类CObject。
+在Workspace窗口的Class View中选择生成的CEmployee类的定义，添加代码：
+class CEmployee : public CObject 
+{
+DECLARE_SERIAL(CEmployee)
+public:
+CString m_strName; // 姓名
+int m_nSex; // 性别
+COleDateTime m_tBirthdate; // 出生日期
+BOOL m_bMarried; // 婚否
+CString m_strDept; // 工作部门
+CString m_strPosition; // 职务
+float m_fSalary; // 工资
+CEmployee(){}
+CEmployee& operator = (CEmployee& e);
+virtual ~CEmployee();
+virtual void Serialize(CArchive &ar);
+};
+CEmployee类的对象即为一个职工的档案，我们用序列化实现文档的存取，所以要为CEmployee类编写序列化代码。这包括DECLARE_SERIAL（）宏和IMPLEMENT_SERIAL（）宏（在CEmployee类的源代码文件中），一个没有参数的构造函数，重载的赋值运算符和Serialize（）成员函数。在CEmployee类的源代码文件中添加以下代码：
+IMPLEMENT_SERIAL(CEmployee, CObject, 1)
+// 重载的赋值运算符
+CEmployee& CEmployee::operator = (CEmployee& e)
+{
+m_strName = e.m_strName;
+m_nSex = e.m_nSex;
+m_tBirthdate = e.m_tBirthdate;
+m_bMarried = e.m_bMarried;
+m_strDept = e.m_strDept;
+m_strPosition = e.m_strPosition;
+m_fSalary = e.m_fSalary;
+return *this;
+}
+// 序列化函数
+void CEmployee::Serialize(CArchive& ar)
+{
+CObject::Serialize(ar);
+if(ar.IsStoring())
+{
+ar << m_strName;
+ar << m_nSex;
+ar << m_tBirthdate;
+ar << m_bMarried;
+ar << m_strDept;
+ar << m_strPosition;
+ar << m_fSalary;
+}
+else
+{
+ar >> m_strName;
+ar >> m_nSex;
+ar >> m_tBirthdate;
+ar >> m_bMarried;
+ar >> m_strDept;
+ar >> m_strPosition;
+ar >> m_fSalary;
+}
+}
+然后修改文档类CMyDocument类定义，添加一个CEmployee类的数组：
+#include "employee.h"
+#define MAX_EMPLOYEE 1000
+class CMy1501Doc : public CDocument
+{
+DECLARE_DYNCREATE(CMy1501Doc)
+public:
+CEmployee m_empList[MAX_EMPLOYEE];
+int m_nCount;
+public:
+virtual BOOL OnNewDocument();
+virtual void Serialize(CArchive& ar);
+virtual void DeleteContents();
+DECLARE_MESSAGE_MAP()
+};
+为了节省篇幅，这段程序经过删节，与原来由AppWizard生成的程序有所不同。其中黑体部分为要添加的代码。注意重载成员函数DeleteContents（）可以手工进行，也可以通过ClassWizard进行。Serialize（）和DeleteContents（）两个成员函数的代码如下：
+void CMy1501Doc::Serialize(CArchive& ar)
+{
+if(ar.IsStoring())
+ar << m_nCount;
+else
+ar >> m_nCount;
+for(int i=0; i<m_nCount; i++)
+m_empList[i].Serialize(ar);
+}
+void CMy1501Doc::DeleteContents() 
+{
+m_nCount = 0; // 在打开文件和建立新文件时将数组大小置0
+CDocument::DeleteContents();
+}
+即在文档类的Serialize（）函数中，数据的序列化工作是通过调用Cemployee类的Serialize（）函数实现的。
+实际上，要为本程序添加的大部分代码均在视图类中。首先在视图类CmyView类的定义中添加一个用于记录当前操作的是哪个记录的数据成员：
+int m_nCurrEmp;
+并为视图类重载OnInitialUpdate（）成员函数，在其中初始化该变量：
+void CMy1501View::OnInitialUpdate() 
+{
+CView::OnInitialUpdate();
+m_nCurrEmp = 0;
+Invalidate();
+}
+视图类的OnDraw（）成员函数用于显示正在操作的职工档案：
+void CMy1501View::OnDraw(CDC* pDC)
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+// 显示职工人数和当前职工编号
+CString s;
+s.Format("职工人数: %d", pDoc->m_nCount);
+pDC->SetTextColor(RGB(255, 0, 0));
+pDC->TextOut( 40, 40, s);
+s.Format("职工编号: %d", m_nCurrEmp+1);
+pDC->TextOut(340, 40, s);
+pDC->MoveTo( 40, 70);
+pDC->LineTo(600, 70);
+// 如果档案非空, 显示当前记录
+if(pDoc->m_nCount > 0)
+{
+// 显示栏目名称
+pDC->SetTextColor(RGB(0, 0, 0));
+pDC->TextOut(140, 90, "姓 名:");
+pDC->TextOut(140, 130, "性 别:");
+pDC->TextOut(140, 170, "出生日期: ");
+pDC->TextOut(140, 210, "婚姻状态:");
+pDC->TextOut(140, 250, "部 门:");
+pDC->TextOut(140, 290, "职 务:");
+pDC->TextOut(140, 330, "工 资:");
+// 显示栏目内容
+pDC->SetTextColor(RGB(0, 0, 255));
+pDC->TextOut(300, 90, pDoc->m_empList[m_nCurrEmp].m_strName);
+if(pDoc->m_empList[m_nCurrEmp].m_nSex==0)
+pDC->TextOut(300, 130, "男");
+else
+pDC->TextOut(300, 130, "女");
+s = pDoc->m_empList[m_nCurrEmp].m_tBirthdate.Format("%Y.%m.%d");
+pDC->TextOut(300, 170, s);
+if(pDoc->m_empList[m_nCurrEmp].m_bMarried)
+pDC->TextOut(300, 210, "已婚");
+else
+pDC->TextOut(300, 210, "未婚");
+pDC->TextOut(300, 250, pDoc->m_empList[m_nCurrEmp].m_strDept);
+pDC->TextOut(300, 290, pDoc->m_empList[m_nCurrEmp].m_strPosition);
+s.Format("%8.2f", pDoc->m_empList[m_nCurrEmp].m_fSalary);
+pDC->TextOut(300, 330, s);
+}
+}
+在编辑资源时，我们框架窗口添加了5个菜单选项，并将对应的消息响应函数映射到了视图类中。这些消息响应函数的代码如下：
+void CMy1501View::OnAppend() 
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+CEmpDlg dlg;
+if(dlg.DoModal() == IDOK)
+{
+pDoc->m_nCount++;
+m_nCurrEmp = pDoc->m_nCount-1;
+pDoc->m_empList[m_nCurrEmp].m_strName = dlg.m_strName;
+pDoc->m_empList[m_nCurrEmp].m_nSex = dlg.m_nSex;
+pDoc->m_empList[m_nCurrEmp].m_tBirthdate = dlg.m_tBirthdate;
+pDoc->m_empList[m_nCurrEmp].m_bMarried = dlg.m_bMarried;
+pDoc->m_empList[m_nCurrEmp].m_strDept = dlg.m_strDept;
+pDoc->m_empList[m_nCurrEmp].m_strPosition = dlg.m_strPosition;
+pDoc->m_empList[m_nCurrEmp].m_fSalary = dlg.m_fSalary;
+pDoc->SetModifiedFlag();
+Invalidate();
+}
+}
+// 删除当前记录
+void CMy1501View::OnDelete() 
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+if(pDoc->m_nCount)
+{
+for(int i=m_nCurrEmp; i<pDoc->m_nCount-1; i++)
+pDoc->m_empList[i] = pDoc->m_empList[i+1];
+pDoc->m_nCount--;
+if(m_nCurrEmp > pDoc->m_nCount-1)
+m_nCurrEmp = pDoc->m_nCount-1;
+pDoc->SetModifiedFlag();
+Invalidate();
+}
+}
+// 编辑当前记录
+void CMy1501View::OnEdit() 
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+if(pDoc->m_nCount)
+{
+CEmpDlg dlg;
+dlg.m_strName = pDoc->m_empList[m_nCurrEmp].m_strName;
+dlg.m_nSex = pDoc->m_empList[m_nCurrEmp].m_nSex;
+dlg.m_tBirthdate = pDoc->m_empList[m_nCurrEmp].m_tBirthdate;
+dlg.m_bMarried = pDoc->m_empList[m_nCurrEmp].m_bMarried;
+dlg.m_strDept = pDoc->m_empList[m_nCurrEmp].m_strDept;
+dlg.m_strPosition = pDoc->m_empList[m_nCurrEmp].m_strPosition;
+dlg.m_fSalary = pDoc->m_empList[m_nCurrEmp].m_fSalary;
+if(dlg.DoModal() == IDOK)
+{
+pDoc->m_empList[m_nCurrEmp].m_strName = dlg.m_strName;
+pDoc->m_empList[m_nCurrEmp].m_nSex = dlg.m_nSex;
+pDoc->m_empList[m_nCurrEmp].m_tBirthdate = dlg.m_tBirthdate;
+pDoc->m_empList[m_nCurrEmp].m_bMarried = dlg.m_bMarried;
+pDoc->m_empList[m_nCurrEmp].m_strDept = dlg.m_strDept;
+pDoc->m_empList[m_nCurrEmp].m_strPosition = dlg.m_strPosition;
+pDoc->m_empList[m_nCurrEmp].m_fSalary = dlg.m_fSalary;
+pDoc->SetModifiedFlag();
+Invalidate();
+}
+}
+}
+// 查看后一记录
+void CMy1501View::OnNext() 
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+if(pDoc->m_nCount > 1)
+{
+if(m_nCurrEmp == pDoc->m_nCount-1)
+m_nCurrEmp = 0;
+else
+m_nCurrEmp++;
+}
+Invalidate();
+}
+// 查看前一记录
+void CMy1501View::OnPrev() 
+{
+CMy1501Doc* pDoc = GetDocument();
+ASSERT_VALID(pDoc);
+if(pDoc->m_nCount > 1)
+{
+if(m_nCurrEmp == 0)
+m_nCurrEmp = pDoc->m_nCount-1;
+else
+m_nCurrEmp--;
+}
+Invalidate();
+}
+
+ 
+
+8-15 用基于对话框的应用程序结构实现例14-5的彩色吹泡泡程序。由于对话框本身结构简单，没有明显的客户区，颜色也不醒目，所以我们在对话框上自行建立一个矩形区域作为吹泡泡的客户区，并通过一个“颜色设置”按钮来设置泡泡的颜色。
+说 明：用AppWizard建立一个基于对话框的应用程序框架（参看15.4：“用AppWizard生成基于对话框的应用程序”），所有设置均使用缺省值。
+使用对话框模板编辑器编辑作为主界面窗口的对话框模板，将其上的静态文本控件和“Cancel”按钮删除，将“OK”按钮的Caption设置为“完成”，并将对话框大小调整为400×300左右。
+为对话框模板添加一个Picture控件，将其Type设置为Frame，Color设置为Black，并设置Sunken属性（在Styles选项卡中）。调整其位置为（7，7），大小为287×287。这个框中即为自定义的吹泡泡客户区，所有的吹泡泡活动均在该区域中进行。
+为对话框模板添加一个按钮，将其ID改为IDC_COLOR，Caption改为“颜色设置”。
+使用ClassWizard为对话框类添加一个鼠标左键消息响应函数OnLButtonDown（）和一个按钮命令消息响应函数OnColor（）。
+
+
+程 序：
+
+在对话框类的头文件前面添加一行：
+#define MAX_BUBBLE 250
+并在对话框类定义中添加存放泡泡的几何参数和颜色的数组数据成员：
+CRect m_rectBubble[MAX_BUBBLE];
+COLORREF m_colorBubble[MAX_BUBBLE];
+int m_nBubbleCount;
+以及一个存放自定义客户区矩形的数据成员和一个存放当前泡泡颜色设置的数据成员：
+CRect m_rectClient;
+COLORREF m_colorCurrent;
+修改对话框类的OnInitDialog（）成员函数，添加计算自定义客户区位置和大小的代码，并将泡泡的数目初始化为0：
+BOOL CMyDlg::OnInitDialog()
+{
+CDialog::OnInitDialog();
+CStatic *pST = (CStatic *)GetDlgItem(IDC_CLIENT);
+pST->GetWindowRect(&m_rectClient);
+ScreenToClient(&m_rectClient);
+m_nBubbleCount = 0; 
+return TRUE;
+}
+修改OnPaint（）成员函数，添加画出泡泡的有关代码：
+void CMyDlg::OnPaint() 
+{
+CPaintDC dc(this);
+CRgn rgn;
+rgn.CreateRectRgnIndirect(&m_rectClient); // 生成一个区域对象
+dc.SelectClipRgn(&rgn); // 选择区域
+dc.Rectangle(m_rectClient); // 将客户区背景设置
+CBrush brushNew, *pbrushOld; // 白色
+for(int i=0; i<m_nBubbleCount; i++)
+{
+brushNew.CreateSolidBrush(m_colorBubble[i]);
+pbrushOld = dc.SelectObject(&brushNew);
+dc.Ellipse(m_rectBubble[i]);
+dc.SelectObject(pbrushOld);
+brushNew.DeleteObject();
+}
+}
+修改由ClassWizard生成的鼠标左键消息响应函数OnLButtonDown（），添加吹泡泡的有关代码：
+void CMyDlg::OnLButtonDown(UINT nFlags, CPoint point) 
+{
+if(m_nBubbleCount < MAX_BUBBLE)
+{
+int r = rand()%50+10;
+CRect rect(point.x-r, point.y-r, point.x+r, point.y+r);
+m_rectBubble[m_nBubbleCount] = rect;
+m_colorBubble[m_nBubbleCount] = m_colorCurrent;
+m_nBubbleCount++;
+InvalidateRect(rect, FALSE);
+}
+}
+最后修改由ClassWizard生成的按钮消息响应函数OnColor（），添加调用颜色设置公用对话框的代码：
+void CMyDlg::OnColor() 
+{
+m_colorCurrent = RGB(200, 200, 200);
+CColorDialog dlg(m_colorCurrent);
+if(dlg.DoModal() == IDOK)
+m_colorCurrent = dlg.GetColor();
+}
+
+[例15-3] 动画播放器程序，可用文件查找公用对话框打开AVI文件并播放。
+程 序：首先在对话框类定义中添加一个存放AVI文件名的变量：
+CString m_strAviname;
+并在OnInitDialog（）函数中添加初始化代码：
+m_strAviname = _T(“”);
+修改对应于3个按钮的消息响应函数：
+void CMy1503Dlg::OnOpen() 
+{
+CFileDialog dlg(TRUE, ".AVI", "*.AVI",
+OFN_FILEMUSTEXIST|OFN_LONGNAMES|OFN_PATHMUSTEXIST,
+"*.AVI", this);
+if(dlg.DoModal() == IDOK)
+{
+m_ctrAvi.Close();
+m_strAviname = dlg.GetPathName();
+m_ctrAvi.Open(LPCTSTR(m_strAviname));
+}
+}
+void CMy1503Dlg::OnPlay() 
+{
+m_ctrAvi.Play(0, 0xffff, 0xffff);
+}
+void CMy1503Dlg::OnStop() 
+{
+m_ctrAvi.Stop();
+}
+
+8-16 编写一个计算器程序。该计算器使用编辑控件直接输入数据，并有“加”、“减”、“乘”、“除”、“平方根”和“倒数”计算功能，如图15-4。
+
+
+程 序：
+
+在对话框类中添加以下数据成员：
+int m_nOP; // 运算符
+double m_fResult; // 运算中间结果
+并在OnInitDialog（）函数中添加相应的初始化代码：
+m_fResult = 0.0;
+m_nOP = 0;
+为对话框类添加一个Calc（）成员函数：
+void CMy1504Dlg::Calc() // 计算
+{
+UpdateData(TRUE);
+switch(m_nOP)
+{
+case 0: // 第1运算对象
+m_fResult = m_fInput;
+break;
+case 1: // +
+m_fResult += m_fInput;
+break;
+case 2: // -
+m_fResult -= m_fInput;
+break;
+case 3: // *
+m_fResult *= m_fInput;
+break;
+case 4: // /
+m_fResult -= m_fInput;
+break;
+case 5: // 1/X
+m_fResult = 1/m_fInput;
+break;
+case 6: // sqrt(X)
+m_fResult = sqrt(m_fInput);
+break;
+}
+m_fInput = m_fResult;
+UpdateData(FALSE);
+}
+最后为所有按钮的消息响应函数添加代码：
+void CMy1504Dlg::OnAdd() // 加法
+{
+Calc();
+m_nOP = 1;
+}
+void CMy1504Dlg::OnSub() // 减法
+{
+Calc();
+m_nOP = 2;
+}
+void CMy1504Dlg::OnMul() // 乘法
+{
+Calc();
+m_nOP = 3;
+}
+void CMy1504Dlg::OnDiv() // 除法
+{
+Calc();
+m_nOP = 4;
+}
+void CMy1504Dlg::OnReciprocal() // 倒数
+{
+m_nOP = 5;
+Calc();
+m_nOP = 0;
+}
+void CMy1504Dlg::OnSqrt() // 平方根
+{
+m_nOP = 6;
+Calc();
+m_nOP = 0;
+}
+void CMy1504Dlg::OnSetfocusInput() // 为输入数据做准备
+{
+m_fInput = 0.0;
+UpdateData(FALSE); 
+}
+void CMy1504Dlg::OnClear() // 清除
+{
+m_fResult = 0.0;
+m_fInput = 0.0;
+m_nOP = 0;
+UpdateData(FALSE);
+}
+void CMy1504Dlg::OnCalc() // 显示计算结果
+{
+Calc();
+m_nOP = 0;
+}
+
+ 
